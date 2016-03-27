@@ -1,11 +1,14 @@
-# Title  
+Title
+=====
 
 Optical Graph Recognition 
 
-# Author 
+Author
+======
 
 Sangwon Lee
 
-# Date   
+Date
+====
 
 2016-03-23 ~ 
