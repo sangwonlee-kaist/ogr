@@ -20,7 +20,7 @@ CXXFLAGS = $(STD_LEVEL) \
            $(LEPT_DIR)  \
            $(OPENCV_DIR)
             
-TARGET   = test
+TARGET   = test.x
 
 all : $(TARGET)
 
