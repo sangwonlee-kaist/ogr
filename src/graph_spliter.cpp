@@ -179,6 +179,54 @@ GraphSpliter::splitGraph()
             {"GraphSpliter::splitGraph(): No y axis in graph."};
         }
 
+    // Check whether top frame exists or not.
+    bool isTopFrameExist = false;
+    int topFrameRowIndex = 0;
+
+    maxNumZeros = 0;
+    for (int rowIndex = 0; rowIndex < numHalfRows; ++rowIndex)
+        {
+        cv::Mat row  = horizontalImage.row(rowIndex);
+        int numZeros = std::count(row.begin<uchar>(), row.end<uchar>(), 0);
+
+        if (numZeros >= maxNumZeros)
+            {
+            maxNumZeros = numZeros;
+            topFrameRowIndex = rowIndex;
+            }
+        }
+
+    if (maxNumZeros > 0.9 * dataImageWidth)
+        {
+        isTopFrameExist = true;
+        // More precise height of data image.
+        dataImageHeight  = xAxisRowIndex - topFrameRowIndex;
+        }
+
+    // Check whether right frame exists or not.
+    bool isRightFrameExist = false;
+    int rightFrameColIndex = 0;
+
+    maxNumZeros = 0;
+    for (int colIndex = numCols - 1; colIndex >= numHalfCols; --colIndex)
+        {
+        cv::Mat col  = verticalImage.col(colIndex);
+        int numZeros = std::count(col.begin<uchar>(), col.end<uchar>(), 0);
+
+        if (numZeros >= maxNumZeros)
+            {
+            maxNumZeros = numZeros;
+            rightFrameColIndex = colIndex;
+            }
+        }
+
+    if (maxNumZeros > 0.9 * dataImageHeight)
+        {
+        isRightFrameExist = true;
+        // More precise width of data image.
+        dataImageWidth  = rightFrameColIndex - yAxisColIndex;
+        }
+
     /*          top
      *     +------------+
      *   l |            | r
