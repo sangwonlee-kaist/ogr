@@ -24,11 +24,14 @@ TARGET   = test.x
 
 all : $(TARGET)
 
-$(TARGET) : test.cpp graph_spliter.o
+$(TARGET) : test.cpp graph_spliter.o axes_parser.o
 	$(CXX) $^ $(CXXFLAGS) -o $@
 
 graph_spliter.o : graph_spliter.hpp graph_spliter.cpp
 	$(CXX) -c graph_spliter.cpp $(CXXFLAGS)
+
+axes_parser.o : axes_parser.hpp axes_parser.cpp
+	$(CXX) -c axes_parser.cpp $(CXXFLAGS)
 
 clean:
 	rm *.o $(TARGET)
