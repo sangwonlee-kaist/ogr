@@ -57,7 +57,8 @@ XAxisParser::parseAxis()
     PRTIMG(pImpl->axisImage)
 
     // Remove unwanted xtics.
-
+    
+ 
 
     pImpl->isParsed = true;
     }
