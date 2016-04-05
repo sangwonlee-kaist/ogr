@@ -16,5 +16,3 @@ AxesParser::~AxesParser()
     {
 
     }
-
-
