@@ -61,9 +61,7 @@ GraphSpliter::splitGraph()
     cv::Mat grayImage;
     if (pImpl->graphImage.channels() == 3)
         {
-        cv::cvtColor(pImpl->graphImage,
-                     grayImage,
-                     cv::COLOR_RGB2GRAY);
+        cv::cvtColor(pImpl->graphImage, grayImage, cv::COLOR_RGB2GRAY);
         }
     else
         {
@@ -80,7 +78,7 @@ GraphSpliter::splitGraph()
         cv::ADAPTIVE_THRESH_MEAN_C,
         cv::THRESH_BINARY,
         5,
-        -2);
+       -2);
 
     PRTIMG(binaryImage)
 
@@ -251,11 +249,11 @@ GraphSpliter::splitGraph()
     PRTIMG(pImpl->dataImage)
 
     // Extract x axis image.
-    int xAxisImageWidth  = numCols;
+    int xAxisImageWidth  = dataImageWidth;
     int xAxisImageHeight = numRows - dataBottomRowIndex;
 
     pImpl->xAxisImage =
-        pImpl->graphImage(cv::Rect(0,
+        pImpl->graphImage(cv::Rect(dataLeftColIndex,
                                    dataBottomRowIndex,
                                    xAxisImageWidth,
                                    xAxisImageHeight)).clone();
@@ -264,11 +262,11 @@ GraphSpliter::splitGraph()
 
     // Extract y axis image.
     int yAxisImageWidth  = dataLeftColIndex;
-    int yAxisImageHeight = numRows;
+    int yAxisImageHeight = dataImageHeight;
 
     pImpl->yAxisImage =
         pImpl->graphImage(cv::Rect(0,
-                                   0,
+                                   dataTopRowIndex,
                                    yAxisImageWidth,
                                    yAxisImageHeight)).clone();
 
