@@ -61,9 +61,7 @@ GraphSpliter::splitGraph()
     cv::Mat grayImage;
     if (pImpl->graphImage.channels() == 3)
         {
-        cv::cvtColor(pImpl->graphImage,
-                     grayImage,
-                     cv::COLOR_RGB2GRAY);
+        cv::cvtColor(pImpl->graphImage, grayImage, cv::COLOR_RGB2GRAY);
         }
     else
         {
@@ -80,7 +78,7 @@ GraphSpliter::splitGraph()
         cv::ADAPTIVE_THRESH_MEAN_C,
         cv::THRESH_BINARY,
         5,
-        -2);
+       -2);
 
     PRTIMG(binaryImage)
 
