@@ -18,7 +18,5 @@ main(int argc, char* argv[])
     xAxisParser.setImage(graphSpliter.getXAxisImage());
     xAxisParser.parseAxis();
 
-    cv::waitKey(0);
-
     return 0;
     }

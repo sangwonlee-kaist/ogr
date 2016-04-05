@@ -12,8 +12,8 @@ class XAxisParser::impl
     {
 public:
      impl() = default;
-    ~impl() = default; 
-    
+    ~impl() = default;
+
     bool isParsed;
     cv::Mat axisImage;
     tesseract::TessBaseAPI tessBaseAPI;
@@ -31,7 +31,7 @@ XAxisParser::~XAxisParser()
 
     }
 
-void 
+void
 XAxisParser::setImage(const cv::Mat& axisImage)
     {
     pImpl->axisImage = axisImage.clone();
@@ -48,7 +48,16 @@ XAxisParser::parseAxis()
         return;
         }
 
-    PRTIMG(pImpl->axisImage) 
+    if (pImpl->axisImage.empty())
+        {
+        throw std::invalid_argument
+            {"XAxisParser::parseAxis(): No input image."};
+        }
 
-    pImpl->isParsed = true; 
+    PRTIMG(pImpl->axisImage)
+
+    // Remove unwanted xtics.
+
+
+    pImpl->isParsed = true;
     }
