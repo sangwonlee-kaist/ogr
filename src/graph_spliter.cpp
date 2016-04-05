@@ -249,11 +249,11 @@ GraphSpliter::splitGraph()
     PRTIMG(pImpl->dataImage)
 
     // Extract x axis image.
-    int xAxisImageWidth  = numCols;
+    int xAxisImageWidth  = dataImageWidth;
     int xAxisImageHeight = numRows - dataBottomRowIndex;
 
     pImpl->xAxisImage =
-        pImpl->graphImage(cv::Rect(0,
+        pImpl->graphImage(cv::Rect(dataLeftColIndex,
                                    dataBottomRowIndex,
                                    xAxisImageWidth,
                                    xAxisImageHeight)).clone();
@@ -262,11 +262,11 @@ GraphSpliter::splitGraph()
 
     // Extract y axis image.
     int yAxisImageWidth  = dataLeftColIndex;
-    int yAxisImageHeight = numRows;
+    int yAxisImageHeight = dataImageHeight;
 
     pImpl->yAxisImage =
         pImpl->graphImage(cv::Rect(0,
-                                   0,
+                                   dataTopRowIndex,
                                    yAxisImageWidth,
                                    yAxisImageHeight)).clone();
 
