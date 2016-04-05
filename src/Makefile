@@ -4,9 +4,9 @@ CXX        = g++
 OPT_LEVEL  = -O3
 STD_LEVEL  = -std=c++11
 
-TESS_INCDIR = -I /usr/local/include/tesseract
+TESS_INCDIR = -I /usr/local/include
 TESS_LIBS   = -ltesseract
-LEPT_INCDIR = -I /usr/local/include/leptonica
+LEPT_INCDIR = -I /usr/local/include
 LEPT_LIBS   = -llept
 OPENCV_INCDIR = -I /usr/local/include/opencv2
 OPENCV_LIBS   = -lopencv_core       \

@@ -1,4 +1,4 @@
 #pragma once
 
-#include "allheaders.h"
-#include "baseapi.h"
+#include "leptonica/allheaders.h"
+#include "tesseract/baseapi.h"
