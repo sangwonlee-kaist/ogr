@@ -1,5 +1,6 @@
 #include "config.hpp"
 #include "graph_spliter.hpp"
+#include "x_axis_parser.hpp"
 
 int
 main(int argc, char* argv[])
@@ -10,9 +11,12 @@ main(int argc, char* argv[])
     graphSpliter.setImage(src);
 
     cv::imshow("src", src);
-    cv::imshow("data", graphSpliter.getDataImage());
-    cv::imshow("x axis", graphSpliter.getXAxisImage());
-    cv::imshow("y axis", graphSpliter.getYAxisImage());
+    //cv::imshow("x axis", graphSpliter.getXAxisImage());
+
+    XAxisParser xAxisParser;
+
+    xAxisParser.setImage(graphSpliter.getXAxisImage());
+    xAxisParser.parseAxis();
 
     cv::waitKey(0);
 
