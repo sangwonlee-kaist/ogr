@@ -57,8 +57,18 @@ XAxisParser::parseAxis()
     PRTIMG(pImpl->axisImage)
 
     // Remove unwanted xtics.
+    // First, Make image to gray color.
+    cv::Mat grayImage;
+    if (pImpl->axisImage.channels() == 3)
+        {
+        cv::cvtColor(pImpl->axisImage, grayImage, cv::COLOR_BGR2GRAY);
+        }
+    else
+        {
+        grayImage = pImpl->axisImage.clone();
+        }
     
- 
+    PRTIMG(grayImage)
 
     pImpl->isParsed = true;
     }
