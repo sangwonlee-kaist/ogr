@@ -61,7 +61,7 @@ GraphSpliter::splitGraph()
     cv::Mat grayImage;
     if (pImpl->graphImage.channels() == 3)
         {
-        cv::cvtColor(pImpl->graphImage, grayImage, cv::COLOR_RGB2GRAY);
+        cv::cvtColor(pImpl->graphImage, grayImage, cv::COLOR_BGR2GRAY);
         }
     else
         {
