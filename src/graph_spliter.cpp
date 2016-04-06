@@ -1,10 +1,7 @@
 #include "graph_spliter.hpp"
 
-//#define DEBUG
-
 #ifdef DEBUG
-    #define PRTIMG(x) cv::imshow(#x, x); \
-                      cv::waitKey(0);
+    #define PRTIMG(x) cv::imshow(#x, x); cv::waitKey(0);
 #else
     #define PRTIMG(x)
 #endif
