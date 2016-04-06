@@ -4,13 +4,16 @@
 
 int
 main(int argc, char* argv[])
-    {
+try {
     cv::Mat src = cv::imread(argv[1]);
     GraphSpliter graphSpliter;
 
     graphSpliter.setImage(src);
 
     cv::imshow("src", src);
+    cv::imshow("data", graphSpliter.getDataImage());
+    cv::imshow("x axis", graphSpliter.getXAxisImage());
+    cv::imshow("y axis", graphSpliter.getYAxisImage());
 
     XAxisParser xAxisParser;
 
@@ -18,4 +21,8 @@ main(int argc, char* argv[])
     xAxisParser.parse();
 
     return 0;
+    }
+catch (std::exception& e)
+    {
+    std::cout << e.what() << std::endl;
     }
