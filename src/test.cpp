@@ -11,9 +11,9 @@ try {
     graphSpliter.setImage(src);
 
     cv::imshow("src", src);
-    cv::imshow("data", graphSpliter.getDataImage());
-    cv::imshow("x axis", graphSpliter.getXAxisImage());
-    cv::imshow("y axis", graphSpliter.getYAxisImage());
+    //cv::imshow("data", graphSpliter.getDataImage());
+    //cv::imshow("x axis", graphSpliter.getXAxisImage());
+    //cv::imshow("y axis", graphSpliter.getYAxisImage());
 
     XAxisParser xAxisParser;
 

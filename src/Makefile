@@ -2,7 +2,7 @@
 
 CXX        = g++
 OPT_LEVEL  = -O3
-STD_LEVEL  = -std=c++11
+STD_LEVEL  = -std=c++11 -DDEBUG
 
 TESS_INCDIR = -I /usr/local/include
 TESS_LIBS   = -ltesseract

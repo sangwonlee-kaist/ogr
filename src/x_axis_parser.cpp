@@ -1,6 +1,6 @@
 #include "x_axis_parser.hpp"
 
-#define DEBUG
+//#define DEBUG
 
 #ifdef DEBUG
     #define PRTIMG(x) cv::imshow(#x, x); cv::waitKey(0);
