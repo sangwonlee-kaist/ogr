@@ -45,7 +45,7 @@ GraphSpliter::setImage(const cv::Mat& graphImage)
     }
 
 void
-GraphSpliter::splitGraph()
+GraphSpliter::split()
     {
     if (pImpl->isSplited)
         {
@@ -61,7 +61,7 @@ GraphSpliter::splitGraph()
     cv::Mat grayImage;
     if (pImpl->graphImage.channels() == 3)
         {
-        cv::cvtColor(pImpl->graphImage, grayImage, cv::COLOR_RGB2GRAY);
+        cv::cvtColor(pImpl->graphImage, grayImage, cv::COLOR_BGR2GRAY);
         }
     else
         {
@@ -147,7 +147,7 @@ GraphSpliter::splitGraph()
     if (dataImageWidth == 0)
         {
         throw std::invalid_argument
-            {"GraphSpliter::splitGraph(): No x axis in graph."};
+            {"GraphSpliter::split(): No x axis in graph."};
         }
 
     int numCols     = pImpl->graphImage.cols;
@@ -174,7 +174,7 @@ GraphSpliter::splitGraph()
     if (dataImageHeight == 0)
         {
         throw std::invalid_argument
-            {"GraphSpliter::splitGraph(): No y axis in graph."};
+            {"GraphSpliter::split(): No y axis in graph."};
         }
 
     // Check whether top frame exists or not.
