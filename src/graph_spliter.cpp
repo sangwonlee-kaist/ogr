@@ -279,7 +279,7 @@ cv::Mat
 GraphSpliter::getXAxisImage()
     {
     if (not (pImpl->isSplited))
-        this->splitGraph();
+        this->split();
     // I'm not sure what is the proper way
     // gives result image as an output.
     // I'm not use xAxisImage directly.
@@ -290,7 +290,7 @@ cv::Mat
 GraphSpliter::getYAxisImage()
     {
     if (not (pImpl->isSplited))
-        this->splitGraph();
+        this->split();
 
     return pImpl->yAxisImage.clone();
     }
@@ -299,7 +299,7 @@ cv::Mat
 GraphSpliter::getDataImage()
     {
     if (not (pImpl->isSplited))
-        this->splitGraph();
+        this->split();
 
     return pImpl->dataImage.clone();
     }
