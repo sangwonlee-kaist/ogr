@@ -8,7 +8,7 @@ public:
      GraphSpliter();
     ~GraphSpliter();
     void setImage(const cv::Mat& graphImage);
-    void splitGraph();
+    void split();
     cv::Mat getXAxisImage();
     cv::Mat getYAxisImage();
     cv::Mat getDataImage();
