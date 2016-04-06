@@ -16,6 +16,7 @@ public:
 
     bool isParsed;
     cv::Mat axisImage;
+    std::string label;
     };
 
 XAxisParser::XAxisParser() : pImpl {new impl}
@@ -102,6 +103,7 @@ XAxisParser::parse()
     bool isNumberRegion = false;
     bool isLabelRegion  = false;
     bool isEmptyRegion  = false;
+    int tickEndRowIndex     = 0;
     int numberBeginRowIndex = 0;
     int numberEndRowIndex   = 0;
     int labelBeginRowIndex  = 0;
@@ -117,6 +119,7 @@ XAxisParser::parse()
             if (not isEmptyRegion && numZeros == 0)
                 {
                 isEmptyRegion = true;
+                tickEndRowIndex = rowIndex - 1;
                 }
             else if (isEmptyRegion && numZeros != 0)
                 {
@@ -155,6 +158,12 @@ XAxisParser::parse()
                 }
             }
         }
+
+    // Include some additional white space.
+    numberBeginRowIndex = (numberBeginRowIndex +    tickEndRowIndex) / 2;
+    numberEndRowIndex   = (numberEndRowIndex   + labelBeginRowIndex) / 2;
+    labelBeginRowIndex  = (numberEndRowIndex   + labelBeginRowIndex) / 2;
+    labelEndRowIndex    = (numRows             +   labelEndRowIndex) / 2;
 
     int numCols = pImpl->axisImage.cols;
 
@@ -197,7 +206,25 @@ XAxisParser::parse()
     std::unique_ptr<char> labelString (tessBaseAPI.GetUTF8Text(),
                                        std::default_delete<char>());
 
-    std::cout << labelString.get() << std::endl;
+    // copy labelString to member.
+    pImpl->label = std::string(labelString.get());
+
+    std::cout << pImpl->label << std::endl;
+
 
     pImpl->isParsed = true;
     }
+
+std::string
+XAxisParser::getLabel()
+    {
+    if (not pImpl->isParsed)
+        this->parse();
+
+    return pImpl->label;
+    }
+
+namespace
+{
+// Helper function.
+}
