@@ -11,12 +11,11 @@ main(int argc, char* argv[])
     graphSpliter.setImage(src);
 
     cv::imshow("src", src);
-    //cv::imshow("x axis", graphSpliter.getXAxisImage());
 
     XAxisParser xAxisParser;
 
     xAxisParser.setImage(graphSpliter.getXAxisImage());
-    xAxisParser.parseAxis();
+    xAxisParser.parse();
 
     return 0;
     }
