@@ -8,7 +8,7 @@ public:
      XAxisParser();
     ~XAxisParser();
     void setImage(const cv::Mat& axisImage);
-    void parseAxis();
+    void parse();
 private:
     class impl;
     std::unique_ptr<impl> pImpl;

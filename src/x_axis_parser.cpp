@@ -37,7 +37,7 @@ XAxisParser::setImage(const cv::Mat& axisImage)
     }
 
 void
-XAxisParser::parseAxis()
+XAxisParser::parse()
     {
     if (pImpl->isParsed)
         {
@@ -48,7 +48,7 @@ XAxisParser::parseAxis()
     if (pImpl->axisImage.empty())
         {
         throw std::invalid_argument
-            {"XAxisParser::parseAxis(): No input image."};
+            {"XAxisParser::parse(): No input image."};
         }
 
     PRTIMG(pImpl->axisImage)
@@ -157,21 +157,12 @@ XAxisParser::parseAxis()
         }
 
     int numCols = pImpl->axisImage.cols;
-//    cv::rectangle(pImpl->axisImage,
-//             cv::Point(0, numberBeginRowIndex),
-//             cv::Point(numCols - 1, numberEndRowIndex),
-//             cv::Scalar(0, 0, 255));
-//
-//    cv::rectangle(pImpl->axisImage,
-//             cv::Point(0, labelBeginRowIndex),
-//             cv::Point(numCols - 1, labelEndRowIndex),
-//             cv::Scalar(0, 0, 255));
 
     cv::Mat numberImage =
         pImpl->axisImage(cv::Rect(0,
-                             numberBeginRowIndex,
-                             numCols,
-                             numberEndRowIndex - numberBeginRowIndex)).clone();
+                            numberBeginRowIndex,
+                            numCols,
+                            numberEndRowIndex - numberBeginRowIndex)).clone();
 
     PRTIMG(numberImage)
 
@@ -188,6 +179,25 @@ XAxisParser::parseAxis()
                                         std::default_delete<char>());
 
     std::cout << numberString.get() << std::endl;
+
+    cv::Mat labelImage =
+        pImpl->axisImage(cv::Rect(0,
+                            labelBeginRowIndex,
+                            numCols,
+                            labelEndRowIndex - labelBeginRowIndex)).clone();
+
+    PRTIMG(labelImage)
+
+    tessBaseAPI.SetImage(static_cast<uchar*>(labelImage.data),
+                    labelImage.size().width,
+                    labelImage.size().height,
+                    labelImage.channels(),
+                    labelImage.step1());
+    // Use unique pointer to prevent memory loss.
+    std::unique_ptr<char> labelString (tessBaseAPI.GetUTF8Text(),
+                                       std::default_delete<char>());
+
+    std::cout << labelString.get() << std::endl;
 
     pImpl->isParsed = true;
     }
