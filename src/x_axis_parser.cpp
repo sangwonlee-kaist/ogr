@@ -16,14 +16,11 @@ public:
 
     bool isParsed;
     cv::Mat axisImage;
-    tesseract::TessBaseAPI tessBaseAPI;
     };
 
 XAxisParser::XAxisParser() : pImpl {new impl}
     {
     pImpl->isParsed = false;
-    // Initialize with english.
-    pImpl->tessBaseAPI.Init(nullptr, "eng");
     }
 
 XAxisParser::~XAxisParser()
@@ -77,8 +74,8 @@ XAxisParser::parseAxis()
         255,
         cv::ADAPTIVE_THRESH_GAUSSIAN_C,
         cv::THRESH_BINARY_INV,
-        3, // Large kernel size to reduce noise.
-       -3  // Larage value to remove noise.
+        3, // Large kernel size to reduce noise (I am not sure).
+       -3  // Larage value to remove noise (I am not sure).
         );
 
     PRTIMG(binaryImage)
@@ -160,17 +157,37 @@ XAxisParser::parseAxis()
         }
 
     int numCols = pImpl->axisImage.cols;
-    cv::rectangle(pImpl->axisImage,
-             cv::Point(0, numberBeginRowIndex),
-             cv::Point(numCols - 1, numberEndRowIndex),
-             cv::Scalar(0, 0, 255));
+//    cv::rectangle(pImpl->axisImage,
+//             cv::Point(0, numberBeginRowIndex),
+//             cv::Point(numCols - 1, numberEndRowIndex),
+//             cv::Scalar(0, 0, 255));
+//
+//    cv::rectangle(pImpl->axisImage,
+//             cv::Point(0, labelBeginRowIndex),
+//             cv::Point(numCols - 1, labelEndRowIndex),
+//             cv::Scalar(0, 0, 255));
 
-    cv::rectangle(pImpl->axisImage,
-             cv::Point(0, labelBeginRowIndex),
-             cv::Point(numCols - 1, labelEndRowIndex),
-             cv::Scalar(0, 0, 255));
+    cv::Mat numberImage =
+        pImpl->axisImage(cv::Rect(0,
+                             numberBeginRowIndex,
+                             numCols,
+                             numberEndRowIndex - numberBeginRowIndex)).clone();
 
-    PRTIMG(pImpl->axisImage)
+    PRTIMG(numberImage)
+
+    // Change image to c string.
+    tesseract::TessBaseAPI tessBaseAPI;
+    tessBaseAPI.Init(nullptr, "eng");
+    tessBaseAPI.SetImage(static_cast<uchar*>(numberImage.data),
+                    numberImage.size().width,
+                    numberImage.size().height,
+                    numberImage.channels(),
+                    numberImage.step1());
+    // Use unique pointer to prevent memory loss.
+    std::unique_ptr<char> numberString (tessBaseAPI.GetUTF8Text(),
+                                        std::default_delete<char>());
+
+    std::cout << numberString.get() << std::endl;
 
     pImpl->isParsed = true;
     }
