@@ -18,7 +18,8 @@ try {
     XAxisParser xAxisParser;
 
     xAxisParser.setImage(graphSpliter.getXAxisImage());
-    xAxisParser.parse();
+
+    std::cout << "x label is " << xAxisParser.getLabel() << std::endl;
 
     return 0;
     }
