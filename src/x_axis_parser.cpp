@@ -16,13 +16,13 @@
 namespace // Helper functions.
 {
 void
-getFixelWidth(const cv::Mat& numberImage,
+analyzeNumberImage(const cv::Mat& numberImage,
               double& offsetValue,
               double& fixelWidth)
     {
     // Calculate the width of fixel from figure ticks.
     // Once you get the fixel width, you can calculate the distance between two
-    // fixels in real world uint.
+    // fixels in real world unit.
 
     cv::Mat img = numberImage.clone();
 
@@ -406,7 +406,7 @@ XAxisParser::parse()
 //
 //    std::cout << numberString.get() << std::endl;
 
-    getFixelWidth(numberImage, pImpl->offsetValue, pImpl->fixelWidth);
+    analyzeNumberImage(numberImage, pImpl->offsetValue, pImpl->fixelWidth);
 
     cv::Mat labelImage =
         pImpl->axisImage(cv::Rect(0,
@@ -443,4 +443,22 @@ XAxisParser::getLabel()
         this->parse();
 
     return pImpl->label;
+    }
+
+double
+XAxisParser::getOffsetValue()
+    {
+    if (not pImpl->isParsed)
+        this->parse();
+
+    return pImpl->offsetValue;
+    }
+
+double
+XAxisParser::getFixelWidth()
+    {
+    if (not pImpl->isParsed)
+        this->parse();
+
+    return pImpl->fixelWidth;
     }
