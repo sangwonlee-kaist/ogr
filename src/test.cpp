@@ -29,12 +29,22 @@ try {
     cv::imshow("x axis", graphSpliter.getXAxisImage());
     cv::imshow("y axis", graphSpliter.getYAxisImage());
 
+    XAxisParser xAxisParser;
+    xAxisParser.setImage(graphSpliter.getXAxisImage());
+    std::cout << "x label is " << xAxisParser.getLabel() << std::endl;
+
+    //double offset     = xAxisParser.getOffsetValue();
+    //double fixelWidth = xAxisParser.getFixelWidth();
+
     PointDetector pointDetector;
     pointDetector.setImage(graphSpliter.getDataImage());
     pointDetector.detect();
-    //XAxisParser xAxisParser;
-    //xAxisParser.setImage(graphSpliter.getXAxisImage());
-    //std::cout << "x label is " << xAxisParser.getLabel() << std::endl;
+
+    std::vector<cv::Point> points;
+    points = pointDetector.getPoints();
+
+    for (auto& point : points)
+        std::cout << point << std::endl;
 
     cv::waitKey(0);
 
