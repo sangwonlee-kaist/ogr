@@ -11,8 +11,10 @@
 
 namespace // Helper functions.
 {
-double
-getFixelWidth(const cv::Mat& numberImage)
+void
+getFixelWidth(const cv::Mat& numberImage,
+              double& offsetValue,
+              double& fixelWidth)
     {
     // Calculate the width of fixel from figure ticks.
     // Once you get the fixel width, you can calculate the distance between two
@@ -122,8 +124,8 @@ getFixelWidth(const cv::Mat& numberImage)
     cv::cvtColor(dispImage, dispImage, cv::COLOR_GRAY2BGR);
     for (int i = 0; i < mergedContours.size(); i++)
         {
-        if (boundRect[i].area() < 100)
-            continue;
+        //if (boundRect[i].area() < 100)
+        //    continue;
 
         cv::rectangle(dispImage,
                       boundRect[i].tl(),
@@ -135,9 +137,75 @@ getFixelWidth(const cv::Mat& numberImage)
     PRTIMG(dispImage)
 #endif
 
-    
+    // Sort merged contour by x direction.
+    std::sort(mergedContours.begin(), mergedContours.end(),
+              [](const std::vector<cv::Point>& c1,
+                 const std::vector<cv::Point>& c2)
+                 {
+                 return cv::boundingRect(c1).x < cv::boundingRect(c2).x;
+                 });
 
-    return 0.0;
+    tesseract::TessBaseAPI tessBaseAPI;
+    tessBaseAPI.Init(nullptr, "eng");
+
+#ifdef DEBUG
+    for (int i = 0; i < mergedContours.size(); ++i)
+        {
+        cv::Mat num = numberImage(cv::boundingRect(mergedContours[i]));
+        tessBaseAPI.SetImage(static_cast<uchar*>(num.data),
+                        num.size().width,
+                        num.size().height,
+                        num.channels(),
+                        num.step1());
+        // Use unique pointer to prevent memory loss.
+        std::unique_ptr<char> numberString (tessBaseAPI.GetUTF8Text(),
+                                            std::default_delete<char>());
+        PRTIMG(num)
+        std::stringstream ss;
+        double number = 0;
+        ss << numberString.get();
+        ss >> number;
+        std::cout << "Number = " << number << std::endl;
+        }
+#endif
+
+    // Throw away first and last element.
+    // Two points are sufficient to figure out unit system.
+    std::vector<double> numValues;
+    std::vector<double> numCenters;
+    for (auto& i : {1,2})
+        {
+        cv::Rect rect = cv::boundingRect(mergedContours[i]);
+        cv::Mat num  = numberImage(rect);
+        tessBaseAPI.SetImage(static_cast<uchar*>(num.data),
+                        num.size().width,
+                        num.size().height,
+                        num.channels(),
+                        num.step1());
+        // Use unique pointer to prevent memory loss.
+        std::unique_ptr<char> numberString (tessBaseAPI.GetUTF8Text(),
+                                            std::default_delete<char>());
+
+        std::stringstream ss;
+        double number = 0;
+        // lexical cast
+        ss << numberString.get(); ss >> number;
+        numValues.push_back(number);
+        numCenters.push_back((rect.x + rect.x + rect.width) / 2);
+        }
+
+    fixelWidth  = ( numValues[1]  - numValues[0]) /
+                  (numCenters[1] - numCenters[0]);
+    offsetValue = numValues[0] - numCenters[0] * fixelWidth;
+
+    std::cout << "Fixel width  = " << fixelWidth  << std::endl;
+    std::cout << "Offset value = " << offsetValue << std::endl;
+
+    // Simple test... predict fourth contour values.
+    cv::Rect rect4 = cv::boundingRect(mergedContours[4]);
+    std::cout << "Expected value = 4" << std::endl;
+    std::cout << "Result   value = " << offsetValue + (rect4.x +
+        rect4.width / 2) * fixelWidth << std::endl;
 
     // Neglect! ---------------------------------------------------------
     // This is an test region.
@@ -157,6 +225,10 @@ public:
     bool isParsed;
     cv::Mat axisImage;
     std::string label;
+    // offset value: the real value of 0 fixel in axis image.
+    // So real world value = offsetValue + fixel * fixelWidth.
+    double offsetValue;
+    double fixelWidth;
     };
 
 XAxisParser::XAxisParser() : pImpl {new impl}
@@ -328,7 +400,11 @@ XAxisParser::parse()
                                         std::default_delete<char>());
 
     std::cout << numberString.get() << std::endl;
-    std::cout << "Label width = " << getFixelWidth(numberImage) << std::endl;
+
+    getFixelWidth(numberImage, pImpl->offsetValue, pImpl->fixelWidth);
+
+    std::cout << "Offset value = " << pImpl->offsetValue << std::endl;
+    std::cout << "Fixel width  = " << pImpl->fixelWidth  << std::endl;
 
     cv::Mat labelImage =
         pImpl->axisImage(cv::Rect(0,
