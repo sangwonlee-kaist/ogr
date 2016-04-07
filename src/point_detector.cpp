@@ -91,6 +91,13 @@ PointDetector::detect()
         boundRect[i] = cv::boundingRect(polyContours[i]);
         }
 
+    // Sort rectangle by x direction.
+    std::sort(boundRect.begin(), boundRect.end(),
+              [](const cv::Rect& c1, const cv::Rect& c2)
+                 {
+                 return c1.x < c2.x;
+                 });
+
     // Draw polygonal contour + bonding rects + circles
     cv::RNG rng (12345);
     cv::Mat drawing = cv::Mat::zeros(thresholdImage.size(), CV_8UC3);
