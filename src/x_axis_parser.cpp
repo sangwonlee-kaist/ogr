@@ -19,44 +19,132 @@ getFixelWidth(const cv::Mat& numberImage)
     // fixels in real world uint.
 
     cv::Mat img = numberImage.clone();
-//
-//    cv::GaussianBlur(img, img, cv::Size (3, 3), 0);
-//
-//    if (img.channels() == 3)
-//        cv::cvtColor(img, img, cv::COLOR_BGR2GRAY);
-//
-//    cv::adaptiveThreshold(
-//        img, // image source.
-//        img, // destination.
-//        255, // max per each fixel.
-//        cv::ADAPTIVE_THRESH_MEAN_C, // kernel style.
-//        cv::THRESH_BINARY, // threshold method.
-//        21,  // Size of a pixel neighborhood.
-//        10); // Constant subtracted from the mean or weighted mean.
-//
-//    img = ~img;
-//
-//    PRTIMG(img);
-//
-//    std::vector<cv::Point> numberPoints;
-//
-//    {
-//    auto it  = img.begin<uchar>();
-//    auto end = img.end<uchar>();
-//
-//    for (; it != end; ++it)
-//        if (*it != 0) numberPoints.push_back(it.pos());
 
-    // New algorithm.
-    // Original source from
-    // http://stackoverflow.com/questions/23506105/extracting-text-opencv
+    cv::GaussianBlur(img, img, cv::Size (3, 3), 0);
+
+    if (img.channels() == 3)
+        cv::cvtColor(img, img, cv::COLOR_BGR2GRAY);
+
+    cv::adaptiveThreshold(
+        img, // image source.
+        img, // destination.
+        255, // max per each fixel.
+        cv::ADAPTIVE_THRESH_MEAN_C, // kernel style.
+        cv::THRESH_BINARY, // threshold method.
+        21,  // Size of a pixel neighborhood.
+        10); // Constant subtracted from the mean or weighted mean.
+
+    img = ~img;
+
+    PRTIMG(img);
+
+    std::vector<cv::Point> numberPoints;
+
+    { // Begin scope.
+    auto it  = img.begin<uchar>();
+    auto end = img.end<uchar>();
+
+    for (; it != end; ++it)
+        if (*it != 0) numberPoints.push_back(it.pos());
+
+    } // End scope.
+
+    // Find initial contours from obtained points.
+    std::vector< std::vector<cv::Point> > contours;
+    // I do not know what it is.
+    std::vector<cv::Vec4i> hierarchy;
+
+    cv::findContours(img,
+        contours,
+        hierarchy,
+        cv::RETR_EXTERNAL,          // I do not know.
+        cv::CHAIN_APPROX_TC89_KCOS); // I do not know. See the reference.
+
+    // Approximate contours to polygons + get bounding rects and circles.
+    // What the..? What does he say...?
+    // I think this means the transform contour to some polygon...?
+    std::vector< std::vector<cv::Point> > polyContours (contours.size());
+
+    for (int i = 0; i < contours.size(); ++i)
+        {
+        // true maens closed polygon.
+        cv::approxPolyDP(contours[i], polyContours[i], 3, true);
+        }
+
+    // Merge small contours.
+    // Too small contours are meaningless.
+    std::vector< std::vector<cv::Point> > mergedContours;
+    for (int i = 0; i < polyContours.size(); i++)
+        {
+        // Find minimum rect which contains given polygon.
+        cv::Rect rectI = cv::boundingRect(polyContours[i]);
+        // Small?
+        if (rectI.area() < 100)
+            continue;
+
+        bool isInside = false;
+        for (int j = 0; j < polyContours.size(); ++j)
+            {
+            // Neglect same polygon.
+            if (i == j)
+                continue;
+
+            cv::Rect rectJ = cv::boundingRect(polyContours[j]);
+
+            if (rectJ.area() < 100 or rectJ.area() < rectI.area())
+                continue;
+            // Inside check.
+            // True if rectI be in rectJ.
+            if (rectI.tl().x > rectJ.tl().x and rectI.br().x < rectJ.br().x and
+                rectI.tl().y > rectJ.tl().y and rectI.br().y < rectJ.br().y)
+                {
+                isInside = true;
+                continue;
+                }
+            }
+
+        if (isInside)
+            continue;
+
+        mergedContours.push_back(polyContours[i]);
+        }
+
+    // Get bounding rects.
+    std::vector<cv::Rect> boundRect (contours.size());
+    // This is not needed at this time.
+    // std::vector<cv::Point> center   (contours.size());
+    for (int i = 0; i < mergedContours.size(); ++i)
+        boundRect[i] = cv::boundingRect(mergedContours[i]);
+
+#ifdef DEBUG
+    // Display for debug.
+    cv::Mat dispImage = img.clone();
+    cv::cvtColor(dispImage, dispImage, cv::COLOR_GRAY2BGR);
+    for (int i = 0; i < mergedContours.size(); i++)
+        {
+        if (boundRect[i].area() < 100)
+            continue;
+
+        cv::rectangle(dispImage,
+                      boundRect[i].tl(),
+                      boundRect[i].br(),
+                      cv::Scalar (0, 255, 0),
+                      2);
+        }
+
+    PRTIMG(dispImage)
+#endif
 
     
 
-    }
-
-
     return 0.0;
+
+    // Neglect! ---------------------------------------------------------
+    // This is an test region.
+    // New algorithm.
+    // Original source from
+    // http://stackoverflow.com/questions/23506105/extracting-text-opencv
+    // ------------------------------------------------------------------
     }
 }
 
