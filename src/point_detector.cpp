@@ -96,7 +96,7 @@ PointDetector::detect()
     cv::Mat drawing = cv::Mat::zeros(thresholdImage.size(), CV_8UC3);
     for(int i = 0; i < contours.size(); ++i)
         {
-        if (boundRect[i].area() > 100)
+        if (boundRect[i].area() > 500)
             continue;
 
         cv::Scalar color = cv::Scalar (rng.uniform(0, 255),
