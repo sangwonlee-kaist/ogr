@@ -3,9 +3,13 @@
 //#define DEBUG
 
 #ifdef DEBUG
-    #define PRTIMG(x) cv::imshow(#x, x); cv::waitKey(0);
+    #define PRTIMG(x)     cv::imshow(#x, x); cv::waitKey(0);
+    #define PRTTXT(x)     std::cout << #x << " = " << x << std::endl;
+    #define PRTTXT2(x, y) std::cout <<  x << " = " << y << std::endl;
 #else
     #define PRTIMG(x)
+    #define PRTTXT(x)
+    #define PRTTXT2(x, y)
 #endif
 
 
@@ -198,15 +202,18 @@ getFixelWidth(const cv::Mat& numberImage,
                   (numCenters[1] - numCenters[0]);
     offsetValue = numValues[0] - numCenters[0] * fixelWidth;
 
-    std::cout << "Fixel width  = " << fixelWidth  << std::endl;
-    std::cout << "Offset value = " << offsetValue << std::endl;
+    //std::cout << "Fixel width  = " << fixelWidth  << std::endl;
+    //std::cout << "Offset value = " << offsetValue << std::endl;
+    PRTTXT(fixelWidth)
+    PRTTXT(offsetValue)
 
+#ifdef DEBUG
     // Simple test... predict fourth contour values.
     cv::Rect rect4 = cv::boundingRect(mergedContours[4]);
     std::cout << "Expected value = 4" << std::endl;
     std::cout << "Result   value = " << offsetValue + (rect4.x +
         rect4.width / 2) * fixelWidth << std::endl;
-
+#endif
     // Neglect! ---------------------------------------------------------
     // This is an test region.
     // New algorithm.
@@ -387,24 +394,19 @@ XAxisParser::parse()
 
     PRTIMG(numberImage)
 
-    // Change image to c string.
-    tesseract::TessBaseAPI tessBaseAPI;
-    tessBaseAPI.Init(nullptr, "eng");
-    tessBaseAPI.SetImage(static_cast<uchar*>(numberImage.data),
-                    numberImage.size().width,
-                    numberImage.size().height,
-                    numberImage.channels(),
-                    numberImage.step1());
-    // Use unique pointer to prevent memory loss.
-    std::unique_ptr<char> numberString (tessBaseAPI.GetUTF8Text(),
-                                        std::default_delete<char>());
-
-    std::cout << numberString.get() << std::endl;
+//    // Change image to c string.
+//    tessBaseAPI.SetImage(static_cast<uchar*>(numberImage.data),
+//                    numberImage.size().width,
+//                    numberImage.size().height,
+//                    numberImage.channels(),
+//                    numberImage.step1());
+//    // Use unique pointer to prevent memory loss.
+//    std::unique_ptr<char> numberString (tessBaseAPI.GetUTF8Text(),
+//                                        std::default_delete<char>());
+//
+//    std::cout << numberString.get() << std::endl;
 
     getFixelWidth(numberImage, pImpl->offsetValue, pImpl->fixelWidth);
-
-    std::cout << "Offset value = " << pImpl->offsetValue << std::endl;
-    std::cout << "Fixel width  = " << pImpl->fixelWidth  << std::endl;
 
     cv::Mat labelImage =
         pImpl->axisImage(cv::Rect(0,
@@ -414,6 +416,8 @@ XAxisParser::parse()
 
     PRTIMG(labelImage)
 
+    tesseract::TessBaseAPI tessBaseAPI;
+    tessBaseAPI.Init(nullptr, "eng");
     tessBaseAPI.SetImage(static_cast<uchar*>(labelImage.data),
                     labelImage.size().width,
                     labelImage.size().height,
@@ -426,7 +430,8 @@ XAxisParser::parse()
     // copy labelString to member.
     pImpl->label = std::string(labelString.get());
 
-    std::cout << pImpl->label << std::endl;
+    //std::cout << pImpl->label << std::endl;
+    PRTTXT(pImpl->label)
 
     pImpl->isParsed = true;
     }
