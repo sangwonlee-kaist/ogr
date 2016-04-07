@@ -31,10 +31,10 @@ try {
 
     XAxisParser xAxisParser;
     xAxisParser.setImage(graphSpliter.getXAxisImage());
-    std::cout << "x label is " << xAxisParser.getLabel() << std::endl;
+    //std::cout << "x label is " << xAxisParser.getLabel() << std::endl;
 
-    //double offset     = xAxisParser.getOffsetValue();
-    //double fixelWidth = xAxisParser.getFixelWidth();
+    double offset     = xAxisParser.getOffsetValue();
+    double fixelWidth = xAxisParser.getFixelWidth();
 
     PointDetector pointDetector;
     pointDetector.setImage(graphSpliter.getDataImage());
@@ -43,8 +43,14 @@ try {
     std::vector<cv::Point> points;
     points = pointDetector.getPoints();
 
+    std::cout << std::setw(10) << xAxisParser.getLabel() << std::endl;
+    std::cout << "----------" << std::endl;
     for (auto& point : points)
-        std::cout << point << std::endl;
+        std::cout << std::setw(10)                     <<
+                     std::setprecision(2)              <<
+                     std::setiosflags(std::ios::fixed) <<
+                     offset + point.x * fixelWidth     <<
+                     std::endl;
 
     cv::waitKey(0);
 
