@@ -158,7 +158,7 @@ GraphSpliter::split()
         cv::Mat col = verticalImage.col(colIndex);
         int numZeros = std::count(col.begin<uchar>(), col.end<uchar>(), 0);
 
-        if (numZeros >= maxNumZeros)
+        if (numZeros > maxNumZeros)
             {
             maxNumZeros = numZeros;
             yAxisColIndex = colIndex;
