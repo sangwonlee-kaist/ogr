@@ -28,11 +28,8 @@ TARGET   = test.x
 
 all : $(TARGET)
 
-<<<<<<< HEAD
-$(TARGET) : test.cpp graph_spliter.o x_axis_parser.o point_detector.o
-=======
-$(TARGET) : test.cpp graph_spliter.o x_axis_parser.o y_axis_parser.o
->>>>>>> develop
+$(TARGET) : test.cpp graph_spliter.o x_axis_parser.o point_detector.o \
+                                     y_axis_parser.o
 	$(CXX) $^ $(CXXFLAGS) -o $@
 
 graph_spliter.o : graph_spliter.hpp graph_spliter.cpp
@@ -47,7 +44,8 @@ point_detector.o: point_detector.hpp point_detector.cpp
                                  $(TESS_INCDIR) $(LEPT_INCDIR)
 
 y_axis_parser.o : y_axis_parser.hpp y_axis_parser.cpp
-	$(CXX) -c y_axis_parser.cpp $(OPT_LEVEL) $(STD_LEVEL) $(OPENCV_INCDIR) $(TESS_INCDIR) $(LEPT_INCDIR)
+	$(CXX) -c y_axis_parser.cpp $(OPT_LEVEL) $(STD_LEVEL) $(OPENCV_INCDIR)    \
+                                $(TESS_INCDIR) $(LEPT_INCDIR)
 
 clean:
 	rm *.o $(TARGET)
