@@ -141,12 +141,12 @@ analyzeNumberImage(const cv::Mat& numberImage,
     PRTIMG(dispImage)
 #endif
 
-    // Sort merged contour by x direction.
+    // Sort merged contour by y direction.
     std::sort(mergedContours.begin(), mergedContours.end(),
               [](const std::vector<cv::Point>& c1,
                  const std::vector<cv::Point>& c2)
                  {
-                 return cv::boundingRect(c1).x < cv::boundingRect(c2).x;
+                 return cv::boundingRect(c1).y > cv::boundingRect(c2).y;
                  });
 
     tesseract::TessBaseAPI tessBaseAPI;
@@ -195,7 +195,7 @@ analyzeNumberImage(const cv::Mat& numberImage,
         // lexical cast
         ss << numberString.get(); ss >> number;
         numValues.push_back(number);
-        numCenters.push_back((rect.x + rect.x + rect.width) / 2);
+        numCenters.push_back((rect.y + rect.y + rect.height) / 2);
         }
 
     fixelWidth  = ( numValues[1]  - numValues[0]) /
@@ -209,10 +209,10 @@ analyzeNumberImage(const cv::Mat& numberImage,
 
 #ifdef DEBUG
     // Simple test... predict fourth contour values.
-    cv::Rect rect4 = cv::boundingRect(mergedContours[4]);
+    cv::Rect rect4 = cv::boundingRect(mergedContours[3]);
     std::cout << "Expected value = 4" << std::endl;
-    std::cout << "Result   value = " << offsetValue + (rect4.x +
-        rect4.width / 2) * fixelWidth << std::endl;
+    std::cout << "Result   value = " << offsetValue + (rect4.y +
+        rect4.height / 2) * fixelWidth << std::endl;
 #endif
     // Neglect! ---------------------------------------------------------
     // This is an test region.
@@ -306,6 +306,9 @@ YAxisParser::parse()
     // 3. label region.
     int numCols = pImpl->axisImage.cols;
 
+    // Very bad assumption.
+    binaryImage.col(numCols - 1) = 0;
+
     // Find first non zero col index.
     int firstNonZeroColIndex = numCols - 1;
     for (int colIndex = numCols - 1; colIndex >= 0; --colIndex)
@@ -395,13 +398,15 @@ YAxisParser::parse()
                             numRows)).clone();
     PRTIMG(numberImage)
 
-    //analyzeNumberImage(numberImage, pImpl->offsetValue, pImpl->fixelWidth);
+    analyzeNumberImage(numberImage, pImpl->offsetValue, pImpl->fixelWidth);
 
     cv::Mat labelImage =
         pImpl->axisImage(cv::Rect(labelEndColIndex,
                             0,
                             labelBeginColIndex - labelEndColIndex,
                             numRows)).clone();
+    // Lotate 90 degree for clockwise.
+    cv::flip(labelImage.t(), labelImage, 1);
 
     PRTIMG(labelImage)
 
