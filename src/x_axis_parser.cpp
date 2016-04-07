@@ -8,6 +8,58 @@
     #define PRTIMG(x)
 #endif
 
+
+namespace // Helper functions.
+{
+double
+getFixelWidth(const cv::Mat& numberImage)
+    {
+    // Calculate the width of fixel from figure ticks.
+    // Once you get the fixel width, you can calculate the distance between two
+    // fixels in real world uint.
+
+    cv::Mat img = numberImage.clone();
+//
+//    cv::GaussianBlur(img, img, cv::Size (3, 3), 0);
+//
+//    if (img.channels() == 3)
+//        cv::cvtColor(img, img, cv::COLOR_BGR2GRAY);
+//
+//    cv::adaptiveThreshold(
+//        img, // image source.
+//        img, // destination.
+//        255, // max per each fixel.
+//        cv::ADAPTIVE_THRESH_MEAN_C, // kernel style.
+//        cv::THRESH_BINARY, // threshold method.
+//        21,  // Size of a pixel neighborhood.
+//        10); // Constant subtracted from the mean or weighted mean.
+//
+//    img = ~img;
+//
+//    PRTIMG(img);
+//
+//    std::vector<cv::Point> numberPoints;
+//
+//    {
+//    auto it  = img.begin<uchar>();
+//    auto end = img.end<uchar>();
+//
+//    for (; it != end; ++it)
+//        if (*it != 0) numberPoints.push_back(it.pos());
+
+    // New algorithm.
+    // Original source from
+    // http://stackoverflow.com/questions/23506105/extracting-text-opencv
+
+    
+
+    }
+
+
+    return 0.0;
+    }
+}
+
 class XAxisParser::impl
     {
 public:
@@ -188,6 +240,7 @@ XAxisParser::parse()
                                         std::default_delete<char>());
 
     std::cout << numberString.get() << std::endl;
+    std::cout << "Label width = " << getFixelWidth(numberImage) << std::endl;
 
     cv::Mat labelImage =
         pImpl->axisImage(cv::Rect(0,
@@ -211,7 +264,6 @@ XAxisParser::parse()
 
     std::cout << pImpl->label << std::endl;
 
-
     pImpl->isParsed = true;
     }
 
@@ -223,8 +275,3 @@ XAxisParser::getLabel()
 
     return pImpl->label;
     }
-
-namespace
-{
-// Helper function.
-}
