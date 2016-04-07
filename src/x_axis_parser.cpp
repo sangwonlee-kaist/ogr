@@ -426,9 +426,10 @@ XAxisParser::parse()
     // Use unique pointer to prevent memory loss.
     std::unique_ptr<char> labelString (tessBaseAPI.GetUTF8Text(),
                                        std::default_delete<char>());
-
+    std::stringstream ss;
+    ss << labelString.get();
     // copy labelString to member.
-    pImpl->label = std::string(labelString.get());
+    std::getline(ss, pImpl->label);
 
     //std::cout << pImpl->label << std::endl;
     PRTTXT(pImpl->label)
