@@ -2,7 +2,7 @@
 
 CXX        = g++
 OPT_LEVEL  = -O3
-STD_LEVEL  = -std=c++11 -DDEBUG
+STD_LEVEL  = -std=c++11 #-DDEBUG
 
 TESS_INCDIR = -I /usr/local/include
 TESS_LIBS   = -ltesseract
@@ -27,6 +27,9 @@ CXXFLAGS = $(STD_LEVEL)     \
 TARGET   = test.x
 
 all : $(TARGET)
+
+debug: CXX+=-DDEBUG
+debug: all
 
 $(TARGET) : test.cpp graph_spliter.o x_axis_parser.o point_detector.o \
                                      y_axis_parser.o

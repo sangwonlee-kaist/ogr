@@ -34,31 +34,37 @@ try {
     xAxisParser.setImage(graphSpliter.getXAxisImage());
     //std::cout << "x label is " << xAxisParser.getLabel() << std::endl;
 
-    double offset     = xAxisParser.getOffsetValue();
-    double fixelWidth = xAxisParser.getFixelWidth();
+    YAxisParser yAxisParser;
+    yAxisParser.setImage(graphSpliter.getYAxisImage());
+    //std::cout << "y label is " << yAxisParser.getLabel() << std::endl;
+
+    double xOffset     = xAxisParser.getOffsetValue();
+    double xFixelWidth = xAxisParser.getFixelWidth();
+
+    double yOffset     = yAxisParser.getOffsetValue();
+    double yFixelWidth = yAxisParser.getFixelWidth();
 
     PointDetector pointDetector;
     pointDetector.setImage(graphSpliter.getDataImage());
-    pointDetector.detect();
 
     std::vector<cv::Point> points;
     points = pointDetector.getPoints();
 
-    std::cout << std::setw(10) << xAxisParser.getLabel() << std::endl;
-    std::cout << "----------" << std::endl;
+    std::cout << std::setw(10) << xAxisParser.getLabel() <<
+                 std::setw(10) << yAxisParser.getLabel() <<
+                 std::endl;
+    std::cout << "--------------------" << std::endl;
     for (auto& point : points)
         std::cout << std::setw(10)                     <<
                      std::setprecision(2)              <<
                      std::setiosflags(std::ios::fixed) <<
-                     offset + point.x * fixelWidth     <<
+                     xOffset + point.x * xFixelWidth   <<
+                     std::setw(10)                     <<
+                     std::setprecision(2)              <<
+                     std::setiosflags(std::ios::fixed) <<
+                     yOffset + point.y * yFixelWidth   <<
                      std::endl;
-
     cv::waitKey(0);
-
-    YAxisParser yAxisParser;
-    yAxisParser.setImage(graphSpliter.getYAxisImage());
-
-    std::cout << "y label is " << yAxisParser.getLabel() << std::endl;
 
     return 0;
     }
