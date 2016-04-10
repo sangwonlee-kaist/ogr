@@ -39,10 +39,10 @@ try {
     //std::cout << "y label is " << yAxisParser.getLabel() << std::endl;
 
     double xOffset     = xAxisParser.getOffsetValue();
-    double xFixelWidth = xAxisParser.getFixelWidth();
+    double fixelWidth = xAxisParser.getFixelWidth();
 
     double yOffset     = yAxisParser.getOffsetValue();
-    double yFixelWidth = yAxisParser.getFixelWidth();
+    double fixelHeight = yAxisParser.getFixelHeight();
 
     PointDetector pointDetector;
     pointDetector.setImage(graphSpliter.getDataImage());
@@ -58,11 +58,11 @@ try {
         std::cout << std::setw(10)                     <<
                      std::setprecision(2)              <<
                      std::setiosflags(std::ios::fixed) <<
-                     xOffset + point.x * xFixelWidth   <<
+                     xOffset + point.x * fixelWidth    <<
                      std::setw(10)                     <<
                      std::setprecision(2)              <<
                      std::setiosflags(std::ios::fixed) <<
-                     yOffset + point.y * yFixelWidth   <<
+                     yOffset + point.y * fixelHeight   <<
                      std::endl;
     cv::waitKey(0);
 
