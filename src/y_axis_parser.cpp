@@ -18,10 +18,10 @@ namespace // Helper functions.
 void
 analyzeNumberImage(const cv::Mat& numberImage,
               double& offsetValue,
-              double& fixelWidth)
+              double& fixelHeight)
     {
-    // Calculate the width of fixel from figure ticks.
-    // Once you get the fixel width, you can calculate the distance between two
+    // Calculate the Height of fixel from figure ticks.
+    // Once you get the fixel Height, you can calculate the distance between two
     // fixels in real world unit.
 
     cv::Mat img = numberImage.clone();
@@ -198,13 +198,13 @@ analyzeNumberImage(const cv::Mat& numberImage,
         numCenters.push_back((rect.y + rect.y + rect.height) / 2);
         }
 
-    fixelWidth  = ( numValues[1]  - numValues[0]) /
+    fixelHeight  = ( numValues[1]  - numValues[0]) /
                   (numCenters[1] - numCenters[0]);
-    offsetValue = numValues[0] - numCenters[0] * fixelWidth;
+    offsetValue = numValues[0] - numCenters[0] * fixelHeight;
 
-    //std::cout << "Fixel width  = " << fixelWidth  << std::endl;
+    //std::cout << "Fixel Height  = " << fixelHeight  << std::endl;
     //std::cout << "Offset value = " << offsetValue << std::endl;
-    PRTTXT(fixelWidth)
+    PRTTXT(fixelHeight)
     PRTTXT(offsetValue)
 
 #ifdef DEBUG
@@ -212,7 +212,7 @@ analyzeNumberImage(const cv::Mat& numberImage,
     cv::Rect rect4 = cv::boundingRect(mergedContours[3]);
     std::cout << "Expected value = 4" << std::endl;
     std::cout << "Result   value = " << offsetValue + (rect4.y +
-        rect4.height / 2) * fixelWidth << std::endl;
+        rect4.height / 2) * fixelHeight << std::endl;
 #endif
     // Neglect! ---------------------------------------------------------
     // This is an test region.
@@ -233,9 +233,9 @@ public:
     cv::Mat axisImage;
     std::string label;
     // offset value: the real value of 0 fixel in axis image.
-    // So real world value = offsetValue + fixel * fixelWidth.
+    // So real world value = offsetValue + fixel * fixelHeight.
     double offsetValue;
-    double fixelWidth;
+    double fixelHeight;
     };
 
 YAxisParser::YAxisParser() : pImpl {new impl}
@@ -398,7 +398,7 @@ YAxisParser::parse()
                             numRows)).clone();
     PRTIMG(numberImage)
 
-    analyzeNumberImage(numberImage, pImpl->offsetValue, pImpl->fixelWidth);
+    analyzeNumberImage(numberImage, pImpl->offsetValue, pImpl->fixelHeight);
 
     cv::Mat labelImage =
         pImpl->axisImage(cv::Rect(labelEndColIndex,
@@ -450,10 +450,10 @@ YAxisParser::getOffsetValue()
     }
 
 double
-YAxisParser::getFixelWidth()
+YAxisParser::getFixelHeight()
     {
     if (not pImpl->isParsed)
         this->parse();
 
-    return pImpl->fixelWidth;
+    return pImpl->fixelHeight;
     }
