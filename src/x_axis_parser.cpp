@@ -3,15 +3,16 @@
 //#define DEBUG
 
 #ifdef DEBUG
-    #define PRTIMG(x)     cv::imshow(#x, x); cv::waitKey(0);
+    #define PRTIMG(x)     cv::imshow(#x, x); cv::waitKey();
     #define PRTTXT(x)     std::cout << #x << " = " << x << std::endl;
+    #define PRTIMG2(x, y) cv::imshow(#x, y); cv::waitKey();
     #define PRTTXT2(x, y) std::cout <<  x << " = " << y << std::endl;
 #else
     #define PRTIMG(x)
     #define PRTTXT(x)
+    #define PRTIMG2(x, y)
     #define PRTTXT2(x, y)
 #endif
-
 
 namespace // Helper functions.
 {
@@ -44,26 +45,17 @@ analyzeNumberImage(const cv::Mat& numberImage,
 
     PRTIMG(img);
 
-    std::vector<cv::Point> numberPoints;
-
-    { // Begin scope.
-    auto it  = img.begin<uchar>();
-    auto end = img.end<uchar>();
-
-    for (; it != end; ++it)
-        if (*it != 0) numberPoints.push_back(it.pos());
-
-    } // End scope.
-
     // Find initial contours from obtained points.
     std::vector< std::vector<cv::Point> > contours;
     // I do not know what it is.
     std::vector<cv::Vec4i> hierarchy;
 
+    // Make rough contours.
+    // Canny edge detector also available?
     cv::findContours(img,
         contours,
         hierarchy,
-        cv::RETR_EXTERNAL,          // I do not know.
+        cv::RETR_EXTERNAL,           // I do not know.
         cv::CHAIN_APPROX_TC89_KCOS); // I do not know. See the reference.
 
     // Approximate contours to polygons + get bounding rects and circles.
@@ -76,6 +68,28 @@ analyzeNumberImage(const cv::Mat& numberImage,
         // true maens closed polygon.
         cv::approxPolyDP(contours[i], polyContours[i], 3, true);
         }
+
+#ifdef DEBUG
+    // Small points are detected.
+    // We can merge this with nearest contours.
+    {
+    // Display for debug.
+    cv::Mat dispImage = img.clone();
+    cv::cvtColor(dispImage, dispImage, cv::COLOR_GRAY2BGR);
+    for (int i = 0; i < polyContours.size(); i++)
+        {
+        cv::Rect rect = cv::boundingRect(polyContours[i]);
+
+        cv::rectangle(dispImage,
+                      rect.tl(),
+                      rect.br(),
+                      cv::Scalar (0, 255, 0), // BGR, so green.
+                      2);
+        }
+
+    PRTIMG(dispImage)
+    }
+#endif
 
     // Merge small contours.
     // Too small contours are meaningless.
@@ -123,6 +137,7 @@ analyzeNumberImage(const cv::Mat& numberImage,
         boundRect[i] = cv::boundingRect(mergedContours[i]);
 
 #ifdef DEBUG
+    {
     // Display for debug.
     cv::Mat dispImage = img.clone();
     cv::cvtColor(dispImage, dispImage, cv::COLOR_GRAY2BGR);
@@ -139,6 +154,7 @@ analyzeNumberImage(const cv::Mat& numberImage,
         }
 
     PRTIMG(dispImage)
+    }
 #endif
 
     // Sort merged contour by x direction.
