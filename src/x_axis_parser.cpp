@@ -61,12 +61,28 @@ analyzeNumberImage(const cv::Mat& numberImage,
     // Approximate contours to polygons + get bounding rects and circles.
     // What the..? What does he say...?
     // I think this means the transform contour to some polygon...?
+    // Remove noise?
     std::vector< std::vector<cv::Point> > polyContours (contours.size());
 
     for (int i = 0; i < contours.size(); ++i)
         {
         // true maens closed polygon.
         cv::approxPolyDP(contours[i], polyContours[i], 3, true);
+        }
+
+    // Sort poly contour by x direction.
+    std::sort(polyContours.begin(), polyContours.end(),
+              [](const std::vector<cv::Point>& c1,
+                 const std::vector<cv::Point>& c2)
+                 {
+                 return cv::boundingRect(c1).x < cv::boundingRect(c2).x;
+                 });
+
+    // Make rect of polyContour.
+    std::vector<cv::Rect> polyContourRects (polyContours.size());
+    for (int i = 0; i < polyContours.size(); ++i)
+        {
+        polyContourRects[i] = cv::boundingRect(polyContours[i]);
         }
 
 #ifdef DEBUG
@@ -76,14 +92,16 @@ analyzeNumberImage(const cv::Mat& numberImage,
     // Display for debug.
     cv::Mat dispImage = img.clone();
     cv::cvtColor(dispImage, dispImage, cv::COLOR_GRAY2BGR);
-    for (int i = 0; i < polyContours.size(); i++)
+    int colorInterval = 255 / polyContours.size();
+    //for (int i = 0; i < polyContours.size(); i++)
+    for (int i = 0; i < polyContourRects.size(); i++)
         {
-        cv::Rect rect = cv::boundingRect(polyContours[i]);
+        //cv::Rect rect = cv::boundingRect(polyContours[i]);
 
         cv::rectangle(dispImage,
-                      rect.tl(),
-                      rect.br(),
-                      cv::Scalar (0, 255, 0), // BGR, so green.
+                      polyContourRects[i].tl(),
+                      polyContourRects[i].br(),
+                      cv::Scalar (0, 255, colorInterval * i), // BGR, so green.
                       2);
         }
 
@@ -92,45 +110,45 @@ analyzeNumberImage(const cv::Mat& numberImage,
 #endif
 
     // Merge small contours.
-    // Too small contours are meaningless.
-    std::vector< std::vector<cv::Point> > mergedContours;
-    for (int i = 0; i < polyContours.size(); i++)
-        {
-        // Find minimum rect which contains given polygon.
-        cv::Rect rectI = cv::boundingRect(polyContours[i]);
-        // Small?
-        if (rectI.area() < 100)
-            continue;
 
-        bool isInside = false;
-        for (int j = 0; j < polyContours.size(); ++j)
-            {
-            // Neglect same polygon.
-            if (i == j)
-                continue;
+    // If two distance between two adjacent contours is smaller than
+    // the width of largest width of contours, they are continuous charaters
+    // (this means that they are two characters in a word).
 
-            cv::Rect rectJ = cv::boundingRect(polyContours[j]);
-
-            if (rectJ.area() < 100 or rectJ.area() < rectI.area())
-                continue;
-            // Inside check.
-            // True if rectI be in rectJ.
-            if (rectI.tl().x > rectJ.tl().x and rectI.br().x < rectJ.br().x and
-                rectI.tl().y > rectJ.tl().y and rectI.br().y < rectJ.br().y)
+    // Find largest width of contours.
+    int maxContourWidth =
+        std::max_element(polyContourRects.begin(), polyContourRects.end(),
+            [](const cv::Rect& r1, const cv::Rect& r2)
                 {
-                isInside = true;
-                continue;
+                return r1.width < r2.width;
                 }
+            )->width;
+
+    PRTTXT(maxContourWidth)
+
+    std::vector< std::vector<cv::Point> > mergedContours {polyContours[0]};
+    for (int i = 0; i < polyContours.size() - 1; i++)
+        {
+        const cv::Rect&  leftRect = polyContourRects[i];
+        const cv::Rect& rightRect = polyContourRects[i + 1];
+
+        if (std::abs(leftRect.br().x - rightRect.tl().x) < maxContourWidth)
+            {
+            // these two characters are in a word.
+            // merge contour.
+            for (const auto point : polyContours[i + 1])
+                mergedContours.back().push_back(point);
             }
-
-        if (isInside)
-            continue;
-
-        mergedContours.push_back(polyContours[i]);
+        else
+            {
+            // Prepare next step.
+            // Add empty std::vector<cv::Point>.
+            mergedContours.push_back(polyContours[i + 1]);
+            }
         }
 
     // Get bounding rects.
-    std::vector<cv::Rect> boundRect (contours.size());
+    std::vector<cv::Rect> boundRect (mergedContours.size());
     // This is not needed at this time.
     // std::vector<cv::Point> center   (contours.size());
     for (int i = 0; i < mergedContours.size(); ++i)
