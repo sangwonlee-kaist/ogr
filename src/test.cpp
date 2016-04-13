@@ -1,5 +1,5 @@
 #include "config.hpp"
-#include "graph_spliter.hpp"
+#include "graph_Splitter.hpp"
 #include "x_axis_parser.hpp"
 #include "point_detector.hpp"
 #include "y_axis_parser.hpp"
@@ -19,23 +19,23 @@ try {
         std::cout << "File " << argv[1] << " does not exist." << std::endl;
         }
 
-    GraphSpliter graphSpliter;
+    GraphSplitter graphSplitter;
 
-    graphSpliter.setImage(src);
-    graphSpliter.split();
+    graphSplitter.setImage(src);
+    graphSplitter.split();
 
     cv::imshow("src image", src);
 
-    cv::imshow("data", graphSpliter.getDataImage());
-    cv::imshow("x axis", graphSpliter.getXAxisImage());
-    cv::imshow("y axis", graphSpliter.getYAxisImage());
+    cv::imshow("data", graphSplitter.getDataImage());
+    cv::imshow("x axis", graphSplitter.getXAxisImage());
+    cv::imshow("y axis", graphSplitter.getYAxisImage());
 
     XAxisParser xAxisParser;
-    xAxisParser.setImage(graphSpliter.getXAxisImage());
+    xAxisParser.setImage(graphSplitter.getXAxisImage());
     //std::cout << "x label is " << xAxisParser.getLabel() << std::endl;
 
     YAxisParser yAxisParser;
-    yAxisParser.setImage(graphSpliter.getYAxisImage());
+    yAxisParser.setImage(graphSplitter.getYAxisImage());
     //std::cout << "y label is " << yAxisParser.getLabel() << std::endl;
 
     double xOffset     = xAxisParser.getOffsetValue();
@@ -45,7 +45,7 @@ try {
     double fixelHeight = yAxisParser.getFixelHeight();
 
     PointDetector pointDetector;
-    pointDetector.setImage(graphSpliter.getDataImage());
+    pointDetector.setImage(graphSplitter.getDataImage());
 
     std::vector<cv::Point> points;
     points = pointDetector.getPoints();
