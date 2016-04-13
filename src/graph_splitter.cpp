@@ -1,4 +1,4 @@
-#include "graph_Splitter.hpp"
+#include "graph_splitter.hpp"
 
 #ifdef DEBUG
     #define PRTIMG(x) cv::imshow(#x, x); cv::waitKey(0);

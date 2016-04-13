@@ -1,5 +1,5 @@
 #include "config.hpp"
-#include "graph_Splitter.hpp"
+#include "graph_splitter.hpp"
 #include "x_axis_parser.hpp"
 #include "point_detector.hpp"
 #include "y_axis_parser.hpp"
