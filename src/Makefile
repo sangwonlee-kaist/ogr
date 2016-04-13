@@ -31,12 +31,12 @@ all : $(TARGET)
 debug: CXX+=-DDEBUG
 debug: all
 
-$(TARGET) : test.cpp graph_spliter.o x_axis_parser.o point_detector.o \
+$(TARGET) : test.cpp graph_splitter.o x_axis_parser.o point_detector.o \
                                      y_axis_parser.o
 	$(CXX) $^ $(CXXFLAGS) -o $@
 
-graph_spliter.o : graph_spliter.hpp graph_spliter.cpp
-	$(CXX) -c graph_spliter.cpp $(OPT_LEVEL) $(STD_LEVEL) $(OPENCV_INCDIR)
+graph_splitter.o : graph_splitter.hpp graph_splitter.cpp
+	$(CXX) -c graph_splitter.cpp $(OPT_LEVEL) $(STD_LEVEL) $(OPENCV_INCDIR)
 
 x_axis_parser.o : x_axis_parser.hpp x_axis_parser.cpp
 	$(CXX) -c x_axis_parser.cpp $(OPT_LEVEL) $(STD_LEVEL) $(OPENCV_INCDIR)    \
