@@ -3,15 +3,16 @@
 //#define DEBUG
 
 #ifdef DEBUG
-    #define PRTIMG(x)     cv::imshow(#x, x); cv::waitKey(0);
+    #define PRTIMG(x)     cv::imshow(#x, x); cv::waitKey();
     #define PRTTXT(x)     std::cout << #x << " = " << x << std::endl;
+    #define PRTIMG2(x, y) cv::imshow(#x, y); cv::waitKey();
     #define PRTTXT2(x, y) std::cout <<  x << " = " << y << std::endl;
 #else
     #define PRTIMG(x)
     #define PRTTXT(x)
+    #define PRTIMG2(x, y)
     #define PRTTXT2(x, y)
 #endif
-
 
 namespace // Helper functions.
 {
@@ -21,7 +22,8 @@ analyzeNumberImage(const cv::Mat& numberImage,
               double& fixelHeight)
     {
     // Calculate the Height of fixel from figure ticks.
-    // Once you get the fixel Height, you can calculate the distance between two
+    // Once you get the fixel height, 
+    // you can calculate the distance between two
     // fixels in real world unit.
 
     cv::Mat img = numberImage.clone();
@@ -43,17 +45,6 @@ analyzeNumberImage(const cv::Mat& numberImage,
     img = ~img;
 
     PRTIMG(img);
-
-    std::vector<cv::Point> numberPoints;
-
-    { // Begin scope.
-    auto it  = img.begin<uchar>();
-    auto end = img.end<uchar>();
-
-    for (; it != end; ++it)
-        if (*it != 0) numberPoints.push_back(it.pos());
-
-    } // End scope.
 
     // Find initial contours from obtained points.
     std::vector< std::vector<cv::Point> > contours;
@@ -77,46 +68,89 @@ analyzeNumberImage(const cv::Mat& numberImage,
         cv::approxPolyDP(contours[i], polyContours[i], 3, true);
         }
 
-    // Merge small contours.
-    // Too small contours are meaningless.
-    std::vector< std::vector<cv::Point> > mergedContours;
-    for (int i = 0; i < polyContours.size(); i++)
+    // Sort poly contour by x direction.
+    std::sort(polyContours.begin(), polyContours.end(),
+              [](const std::vector<cv::Point>& c1,
+                 const std::vector<cv::Point>& c2)
+                 {
+                 return cv::norm(cv::boundingRect(c1).br()) < 
+                        cv::norm(cv::boundingRect(c2).br());
+                 });    // Merge small contours.
+
+    // Make rect of polyContour.
+    std::vector<cv::Rect> polyContourRects (polyContours.size());
+    for (int i = 0; i < polyContours.size(); ++i)
         {
-        // Find minimum rect which contains given polygon.
-        cv::Rect rectI = cv::boundingRect(polyContours[i]);
-        // Small?
-        if (rectI.area() < 100)
-            continue;
+        polyContourRects[i] = cv::boundingRect(polyContours[i]);
+        }
 
-        bool isInside = false;
-        for (int j = 0; j < polyContours.size(); ++j)
-            {
-            // Neglect same polygon.
-            if (i == j)
-                continue;
+#ifdef DEBUG
+    // Small points are detected.
+    // We can merge this with nearest contours.
+    {
+    // Display for debug.
+    cv::Mat dispImage = img.clone();
+    cv::cvtColor(dispImage, dispImage, cv::COLOR_GRAY2BGR);
+    int colorInterval = 255 / polyContours.size();
+    //for (int i = 0; i < polyContours.size(); i++)
+    for (int i = 0; i < polyContourRects.size(); i++)
+        {
+        //cv::Rect rect = cv::boundingRect(polyContours[i]);
 
-            cv::Rect rectJ = cv::boundingRect(polyContours[j]);
+        cv::rectangle(dispImage,
+                      polyContourRects[i].tl(),
+                      polyContourRects[i].br(),
+                      cv::Scalar (0, 255, colorInterval * i), // BGR, so green.
+                      2);
+        }
 
-            if (rectJ.area() < 100 or rectJ.area() < rectI.area())
-                continue;
-            // Inside check.
-            // True if rectI be in rectJ.
-            if (rectI.tl().x > rectJ.tl().x and rectI.br().x < rectJ.br().x and
-                rectI.tl().y > rectJ.tl().y and rectI.br().y < rectJ.br().y)
+    PRTIMG(dispImage)
+    }
+#endif
+
+    // Merge small contours.
+
+    // If two distance between two adjacent contours is smaller than
+    // the width of largest width of contours, they are continuous charaters
+    // (this means that they are two characters in a word).
+
+    // Find largest width of contours.
+    int maxContourWidth =
+        std::max_element(polyContourRects.begin(), polyContourRects.end(),
+            [](const cv::Rect& r1, const cv::Rect& r2)
                 {
-                isInside = true;
-                continue;
+                return r1.width < r2.width;
                 }
+            )->width;
+
+    PRTTXT(maxContourWidth)
+
+    std::vector< std::vector<cv::Point> > mergedContours {polyContours[0]};
+    for (int i = 0; i < polyContours.size() - 1; i++)
+        {
+        const cv::Rect&  leftRect = polyContourRects[i];
+        const cv::Rect& rightRect = polyContourRects[i + 1];
+
+        cv::Point  leftBr {leftRect.br()};
+        cv::Point rightBl {rightRect.tl().x, rightRect.br().y};
+
+        if (cv::norm(leftBr - rightBl) < maxContourWidth)
+            {
+            // these two characters are in a word.
+            // merge contour.
+            for (const auto point : polyContours[i + 1])
+                mergedContours.back().push_back(point);
             }
-
-        if (isInside)
-            continue;
-
-        mergedContours.push_back(polyContours[i]);
+        else
+            {
+            // Prepare next step.
+            // Add empty std::vector<cv::Point>.
+            mergedContours.push_back(polyContours[i + 1]);
+            }
         }
 
     // Get bounding rects.
-    std::vector<cv::Rect> boundRect (contours.size());
+    std::vector<cv::Rect> boundRect (mergedContours.size());
     // This is not needed at this time.
     // std::vector<cv::Point> center   (contours.size());
     for (int i = 0; i < mergedContours.size(); ++i)
@@ -156,6 +190,7 @@ analyzeNumberImage(const cv::Mat& numberImage,
     for (int i = 0; i < mergedContours.size(); ++i)
         {
         cv::Mat num = numberImage(cv::boundingRect(mergedContours[i]));
+        cv::resize(num, num, cv::Size (100, 100));
         tessBaseAPI.SetImage(static_cast<uchar*>(num.data),
                         num.size().width,
                         num.size().height,
@@ -181,6 +216,7 @@ analyzeNumberImage(const cv::Mat& numberImage,
         {
         cv::Rect rect = cv::boundingRect(mergedContours[i]);
         cv::Mat num  = numberImage(rect);
+        cv::resize(num, num, cv::Size (100, 100));
         tessBaseAPI.SetImage(static_cast<uchar*>(num.data),
                         num.size().width,
                         num.size().height,
@@ -306,83 +342,133 @@ YAxisParser::parse()
     // 3. label region.
     int numCols = pImpl->axisImage.cols;
 
-    // Very bad assumption.
-    binaryImage.col(numCols - 1) = 0;
 
-    // Find first non zero col index.
-    int firstNonZeroColIndex = numCols - 1;
-    for (int colIndex = numCols - 1; colIndex >= 0; --colIndex)
+    std::vector<int> zeroHistogram (numCols);
+
+    for (int colIndex = 0; colIndex < numCols; ++colIndex)
         {
         cv::Mat col = binaryImage.col(colIndex);
-        if (std::count(col.begin<uchar>(), col.end<uchar>(), 0) > 0)
-            {
-            firstNonZeroColIndex = colIndex;
-            break;
-            }
-        }
+        zeroHistogram[colIndex] =
+            std::count(col.begin<uchar>(), col.end<uchar>(), 0);
+        } 
 
-    PRTTXT(firstNonZeroColIndex)
+#ifdef DEBUG
+    {
+    int maxHistogram = *std::max_element(zeroHistogram.begin(), 
+                                         zeroHistogram.end());
+    
+    cv::Mat canvas = cv::Mat::ones (maxHistogram, numCols, CV_8UC3);
 
-    bool isTickRegion   = true;
-    bool isNumberRegion = false;
-    bool isLabelRegion  = false;
-    bool isEmptyRegion  = false;
-    int tickEndColIndex     = numCols;
-    int numberBeginColIndex = numCols;
-    int numberEndColIndex   = numCols;
-    int labelBeginColIndex  = numCols;
-    int labelEndColIndex    = 0;
-
-    for (int colIndex = firstNonZeroColIndex; colIndex >= 0; --colIndex)
+    for (int i = 0; i < numCols; ++i)
         {
-        cv::Mat col = binaryImage.col(colIndex);
-        int numZeros = std::count(col.begin<uchar>(), col.end<uchar>(), 0);
-
-        if (isTickRegion)
-            {
-            if (not isEmptyRegion && numZeros == 0)
-                {
-                isEmptyRegion = true;
-                tickEndColIndex = colIndex + 1;
-                }
-            else if (isEmptyRegion && numZeros != 0)
-                {
-                isEmptyRegion = false;
-                isTickRegion  = false;
-                isNumberRegion = true;
-                isLabelRegion  = false;
-                numberBeginColIndex = colIndex;
-                }
-            }
-
-        if (isNumberRegion)
-            {
-            if (not isEmptyRegion && numZeros == 0)
-                {
-                isEmptyRegion = true;
-                numberEndColIndex = colIndex + 1;
-                }
-            else if (isEmptyRegion && numZeros != 0)
-                {
-                isEmptyRegion = false;
-                isTickRegion  = false;
-                isNumberRegion = false;
-                isLabelRegion  = true;
-                labelBeginColIndex = colIndex;
-                }
-            }
-
-        if (isLabelRegion)
-            {
-            // Nohing to do...
-            if (not isEmptyRegion && numZeros == 0)
-                {
-                isEmptyRegion = true;
-                labelEndColIndex = colIndex + 1;
-                }
-            }
+        cv::line(canvas, cv::Point(i, maxHistogram), 
+                         cv::Point(i, maxHistogram - zeroHistogram[i]),
+                         cv::Scalar(0, 255, 0));
         }
 
+    cv::imshow("zero histogram on y axis", canvas); cv::waitKey();
+    } 
+#endif
+
+    std::vector<int> zeroSignals (zeroHistogram.size());
+    std::transform(zeroHistogram.begin(), zeroHistogram.end(), // Source.
+                   zeroSignals.begin(), // Destination. 
+                   [](int val) 
+                       {
+                       return (val > 0 ? 1 : 0);
+                       });
+
+    std::vector<int> signalDiffs (zeroSignals.size());
+    std::adjacent_difference(zeroSignals.begin(), zeroSignals.end(),
+                             signalDiffs.begin());
+
+    int tickEndColIndex = numCols;
+    std::vector< std::pair<int, int> > regionBeginEnd;     
+    {
+    int sigBeg, sigEnd;
+    for (int i = 0; i < signalDiffs.size(); ++i)
+        {
+        const int& sig = signalDiffs[i];
+        if (sig == 1)
+            {
+            sigBeg = i;
+            }
+        else if (sig == -1)
+            {
+            sigEnd = i;
+            regionBeginEnd.push_back({sigBeg, sigEnd});
+            sigBeg = sigEnd = 0;
+            }
+
+        if (i == signalDiffs.size() - 1)
+            {
+            if (sigBeg != 0 and sigEnd == 0)
+                tickEndColIndex = sigBeg;
+            }
+        }    
+    }
+
+    auto maxRegionPairIterator =
+        max_element(regionBeginEnd.begin(), regionBeginEnd.end(), 
+            [](const std::pair<int, int>& p1, const std::pair<int, int>& p2)
+                {
+                return p1.second - p1.first < p2.second - p2.first;
+                });
+
+    int maxRegionWidth = maxRegionPairIterator->second - 
+                         maxRegionPairIterator->first;
+
+    PRTTXT(maxRegionWidth)
+
+    // Merge small regions.
+    std::vector< std::pair<int, int> > mergedRegionBeginEnd;
+    {
+    int beg = regionBeginEnd[0].first;
+    int end = regionBeginEnd[0].second;
+    for (int i = 0; i < regionBeginEnd.size() - 1; ++i)
+        {
+        std::pair<int, int>&  leftPair = regionBeginEnd[i];
+        std::pair<int, int>& rightPair = regionBeginEnd[i + 1];
+
+        // Merge them but do not put to array 
+        // (possibility of additional merging).
+        PRTTXT(rightPair.first - leftPair.second)
+        if (rightPair.first - leftPair.second < maxRegionWidth / 3)
+            {
+            end = rightPair.second; 
+            }
+        else
+            {
+            mergedRegionBeginEnd.push_back({beg, end});
+            // prepair next step.
+            beg = rightPair.first;
+            end = rightPair.second;
+            }
+
+        if (i == regionBeginEnd.size() - 2)
+            {
+            mergedRegionBeginEnd.push_back({beg, end});
+            }
+        }
+    }
+
+    if (mergedRegionBeginEnd.size() != 2)
+        {
+        throw std::logic_error 
+            {"YAxisParser::parse(): region seperation fails."};
+        }
+    
+#ifdef DEBUG
+
+    for (auto& pa : mergedRegionBeginEnd)
+        std::cout << pa.first << ", " << pa.second << std::endl;
+
+#endif
+
+    int numberBeginColIndex = mergedRegionBeginEnd[1].second;
+    int numberEndColIndex   = mergedRegionBeginEnd[1].first;
+    int labelBeginColIndex  = mergedRegionBeginEnd[0].second;
+    int labelEndColIndex    = mergedRegionBeginEnd[0].first;
     // Include some additional white space.
     numberBeginColIndex = (numberBeginColIndex +    tickEndColIndex) / 2;
     numberEndColIndex   = (numberEndColIndex   + labelBeginColIndex) / 2;
