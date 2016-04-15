@@ -108,45 +108,49 @@ analyzeNumberImage(const cv::Mat& numberImage,
     }
 #endif
 
-    // Too small contours are meaningless.
-    std::vector< std::vector<cv::Point> > mergedContours;
-    for (int i = 0; i < polyContours.size(); i++)
-        {
-        // Find minimum rect which contains given polygon.
-        cv::Rect rectI = cv::boundingRect(polyContours[i]);
-        // Small?
-        if (rectI.area() < 100)
-            continue;
+    // Merge small contours.
 
-        bool isInside = false;
-        for (int j = 0; j < polyContours.size(); ++j)
-            {
-            // Neglect same polygon.
-            if (i == j)
-                continue;
+    // If two distance between two adjacent contours is smaller than
+    // the width of largest width of contours, they are continuous charaters
+    // (this means that they are two characters in a word).
 
-            cv::Rect rectJ = cv::boundingRect(polyContours[j]);
-
-            if (rectJ.area() < 100 or rectJ.area() < rectI.area())
-                continue;
-            // Inside check.
-            // True if rectI be in rectJ.
-            if (rectI.tl().x > rectJ.tl().x and rectI.br().x < rectJ.br().x and
-                rectI.tl().y > rectJ.tl().y and rectI.br().y < rectJ.br().y)
+    // Find largest width of contours.
+    int maxContourWidth =
+        std::max_element(polyContourRects.begin(), polyContourRects.end(),
+            [](const cv::Rect& r1, const cv::Rect& r2)
                 {
-                isInside = true;
-                continue;
+                return r1.width < r2.width;
                 }
+            )->width;
+
+    PRTTXT(maxContourWidth)
+
+    std::vector< std::vector<cv::Point> > mergedContours {polyContours[0]};
+    for (int i = 0; i < polyContours.size() - 1; i++)
+        {
+        const cv::Rect&  leftRect = polyContourRects[i];
+        const cv::Rect& rightRect = polyContourRects[i + 1];
+
+        cv::Point  leftBr {leftRect.br()};
+        cv::Point rightBl {rightRect.tl().x, rightRect.br().y};
+
+        if (cv::norm(leftBr - rightBl) < maxContourWidth)
+            {
+            // these two characters are in a word.
+            // merge contour.
+            for (const auto point : polyContours[i + 1])
+                mergedContours.back().push_back(point);
             }
-
-        if (isInside)
-            continue;
-
-        mergedContours.push_back(polyContours[i]);
+        else
+            {
+            // Prepare next step.
+            // Add empty std::vector<cv::Point>.
+            mergedContours.push_back(polyContours[i + 1]);
+            }
         }
 
     // Get bounding rects.
-    std::vector<cv::Rect> boundRect (contours.size());
+    std::vector<cv::Rect> boundRect (mergedContours.size());
     // This is not needed at this time.
     // std::vector<cv::Point> center   (contours.size());
     for (int i = 0; i < mergedContours.size(); ++i)
@@ -186,6 +190,7 @@ analyzeNumberImage(const cv::Mat& numberImage,
     for (int i = 0; i < mergedContours.size(); ++i)
         {
         cv::Mat num = numberImage(cv::boundingRect(mergedContours[i]));
+        cv::resize(num, num, cv::Size (100, 100));
         tessBaseAPI.SetImage(static_cast<uchar*>(num.data),
                         num.size().width,
                         num.size().height,
@@ -211,6 +216,7 @@ analyzeNumberImage(const cv::Mat& numberImage,
         {
         cv::Rect rect = cv::boundingRect(mergedContours[i]);
         cv::Mat num  = numberImage(rect);
+        cv::resize(num, num, cv::Size (100, 100));
         tessBaseAPI.SetImage(static_cast<uchar*>(num.data),
                         num.size().width,
                         num.size().height,
