@@ -19,12 +19,12 @@ namespace // Helper functions.
 void
 analyzeNumberImage(const cv::Mat& numberImage,
               double& offsetValue,
-              double& fixelHeight)
+              double& pixelHeight)
     {
-    // Calculate the Height of fixel from figure ticks.
-    // Once you get the fixel height, 
+    // Calculate the Height of pixel from figure ticks.
+    // Once you get the pixel height, 
     // you can calculate the distance between two
-    // fixels in real world unit.
+    // pixels in real world unit.
 
     cv::Mat img = numberImage.clone();
 
@@ -36,7 +36,7 @@ analyzeNumberImage(const cv::Mat& numberImage,
     cv::adaptiveThreshold(
         img, // image source.
         img, // destination.
-        255, // max per each fixel.
+        255, // max per each pixel.
         cv::ADAPTIVE_THRESH_MEAN_C, // kernel style.
         cv::THRESH_BINARY, // threshold method.
         21,  // Size of a pixel neighborhood.
@@ -234,13 +234,13 @@ analyzeNumberImage(const cv::Mat& numberImage,
         numCenters.push_back((rect.y + rect.y + rect.height) / 2);
         }
 
-    fixelHeight  = ( numValues[1]  - numValues[0]) /
+    pixelHeight  = ( numValues[1]  - numValues[0]) /
                   (numCenters[1] - numCenters[0]);
-    offsetValue = numValues[0] - numCenters[0] * fixelHeight;
+    offsetValue = numValues[0] - numCenters[0] * pixelHeight;
 
-    //std::cout << "Fixel Height  = " << fixelHeight  << std::endl;
+    //std::cout << "Pixel Height  = " << pixelHeight  << std::endl;
     //std::cout << "Offset value = " << offsetValue << std::endl;
-    PRTTXT(fixelHeight)
+    PRTTXT(pixelHeight)
     PRTTXT(offsetValue)
 
 #ifdef DEBUG
@@ -248,7 +248,7 @@ analyzeNumberImage(const cv::Mat& numberImage,
     cv::Rect rect4 = cv::boundingRect(mergedContours[3]);
     std::cout << "Expected value = 4" << std::endl;
     std::cout << "Result   value = " << offsetValue + (rect4.y +
-        rect4.height / 2) * fixelHeight << std::endl;
+        rect4.height / 2) * pixelHeight << std::endl;
 #endif
     // Neglect! ---------------------------------------------------------
     // This is an test region.
@@ -268,10 +268,10 @@ public:
     bool isParsed;
     cv::Mat axisImage;
     std::string label;
-    // offset value: the real value of 0 fixel in axis image.
-    // So real world value = offsetValue + fixel * fixelHeight.
+    // offset value: the real value of 0 pixel in axis image.
+    // So real world value = offsetValue + pixel * pixelHeight.
     double offsetValue;
-    double fixelHeight;
+    double pixelHeight;
     };
 
 YAxisParser::YAxisParser() : pImpl {new impl}
@@ -484,7 +484,7 @@ YAxisParser::parse()
                             numRows)).clone();
     PRTIMG(numberImage)
 
-    analyzeNumberImage(numberImage, pImpl->offsetValue, pImpl->fixelHeight);
+    analyzeNumberImage(numberImage, pImpl->offsetValue, pImpl->pixelHeight);
 
     cv::Mat labelImage =
         pImpl->axisImage(cv::Rect(labelEndColIndex,
@@ -536,10 +536,10 @@ YAxisParser::getOffsetValue()
     }
 
 double
-YAxisParser::getFixelHeight()
+YAxisParser::getPixelHeight()
     {
     if (not pImpl->isParsed)
         this->parse();
 
-    return pImpl->fixelHeight;
+    return pImpl->pixelHeight;
     }

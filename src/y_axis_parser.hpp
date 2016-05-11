@@ -11,7 +11,7 @@ public:
     void parse();
     std::string getLabel();
     double getOffsetValue();
-    double getFixelHeight();
+    double getPixelHeight();
 private:
     class impl;
     std::unique_ptr<impl> pImpl;

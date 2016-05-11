@@ -24,11 +24,11 @@ try {
     graphSplitter.setImage(src);
     graphSplitter.split();
 
-    cv::imshow("src image", src);
-
-    cv::imshow("data", graphSplitter.getDataImage());
-    cv::imshow("x axis", graphSplitter.getXAxisImage());
-    cv::imshow("y axis", graphSplitter.getYAxisImage());
+//    cv::imshow("src image", src);
+//
+//    cv::imshow("data", graphSplitter.getDataImage());
+//    cv::imshow("x axis", graphSplitter.getXAxisImage());
+//    cv::imshow("y axis", graphSplitter.getYAxisImage());
 
     XAxisParser xAxisParser;
     xAxisParser.setImage(graphSplitter.getXAxisImage());
@@ -39,10 +39,10 @@ try {
     //std::cout << "y label is " << yAxisParser.getLabel() << std::endl;
 
     double xOffset     = xAxisParser.getOffsetValue();
-    double fixelWidth = xAxisParser.getFixelWidth();
+    double pixelWidth = xAxisParser.getPixelWidth();
 
     double yOffset     = yAxisParser.getOffsetValue();
-    double fixelHeight = yAxisParser.getFixelHeight();
+    double pixelHeight = yAxisParser.getPixelHeight();
 
     PointDetector pointDetector;
     pointDetector.setImage(graphSplitter.getDataImage());
@@ -58,11 +58,11 @@ try {
         std::cout << std::setw(10)                     <<
                      std::setprecision(2)              <<
                      std::setiosflags(std::ios::fixed) <<
-                     xOffset + point.x * fixelWidth    <<
+                     xOffset + point.x * pixelWidth    <<
                      std::setw(10)                     <<
                      std::setprecision(2)              <<
                      std::setiosflags(std::ios::fixed) <<
-                     yOffset + point.y * fixelHeight   <<
+                     yOffset + point.y * pixelHeight   <<
                      std::endl;
     cv::waitKey(0);
 

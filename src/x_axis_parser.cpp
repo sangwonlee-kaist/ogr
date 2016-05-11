@@ -19,11 +19,11 @@ namespace // Helper functions.
 void
 analyzeNumberImage(const cv::Mat& numberImage,
               double& offsetValue,
-              double& fixelWidth)
+              double& pixelWidth)
     {
-    // Calculate the width of fixel from figure ticks.
-    // Once you get the fixel width, you can calculate the distance between two
-    // fixels in real world unit.
+    // Calculate the width of pixel from figure ticks.
+    // Once you get the pixel width, you can calculate the distance between two
+    // pixels in real world unit.
 
     cv::Mat img = numberImage.clone();
 
@@ -35,7 +35,7 @@ analyzeNumberImage(const cv::Mat& numberImage,
     cv::adaptiveThreshold(
         img, // image source.
         img, // destination.
-        255, // max per each fixel.
+        255, // max per each pixel.
         cv::ADAPTIVE_THRESH_MEAN_C, // kernel style.
         cv::THRESH_BINARY, // threshold method.
         21,  // Size of a pixel neighborhood.
@@ -232,13 +232,13 @@ analyzeNumberImage(const cv::Mat& numberImage,
         numCenters.push_back((rect.x + rect.x + rect.width) / 2);
         }
 
-    fixelWidth  = ( numValues[1]  - numValues[0]) /
+    pixelWidth  = ( numValues[1]  - numValues[0]) /
                   (numCenters[1] - numCenters[0]);
-    offsetValue = numValues[0] - numCenters[0] * fixelWidth;
+    offsetValue = numValues[0] - numCenters[0] * pixelWidth;
 
-    //std::cout << "Fixel width  = " << fixelWidth  << std::endl;
+    //std::cout << "Pixel width  = " << pixelWidth  << std::endl;
     //std::cout << "Offset value = " << offsetValue << std::endl;
-    PRTTXT(fixelWidth)
+    PRTTXT(pixelWidth)
     PRTTXT(offsetValue)
 
 #ifdef DEBUG
@@ -246,7 +246,7 @@ analyzeNumberImage(const cv::Mat& numberImage,
     cv::Rect rect4 = cv::boundingRect(mergedContours[4]);
     std::cout << "Expected value = 4" << std::endl;
     std::cout << "Result   value = " << offsetValue + (rect4.x +
-        rect4.width / 2) * fixelWidth << std::endl;
+        rect4.width / 2) * pixelWidth << std::endl;
 #endif
     // Neglect! ---------------------------------------------------------
     // This is an test region.
@@ -266,10 +266,10 @@ public:
     bool isParsed;
     cv::Mat axisImage;
     std::string label;
-    // offset value: the real value of 0 fixel in axis image.
-    // So real world value = offsetValue + fixel * fixelWidth.
+    // offset value: the real value of 0 pixel in axis image.
+    // So real world value = offsetValue + pixel * pixelWidth.
     double offsetValue;
-    double fixelWidth;
+    double pixelWidth;
     };
 
 XAxisParser::XAxisParser() : pImpl {new impl}
@@ -440,7 +440,7 @@ XAxisParser::parse()
 //
 //    std::cout << numberString.get() << std::endl;
 
-    analyzeNumberImage(numberImage, pImpl->offsetValue, pImpl->fixelWidth);
+    analyzeNumberImage(numberImage, pImpl->offsetValue, pImpl->pixelWidth);
 
     cv::Mat labelImage =
         pImpl->axisImage(cv::Rect(0,
@@ -490,10 +490,10 @@ XAxisParser::getOffsetValue()
     }
 
 double
-XAxisParser::getFixelWidth()
+XAxisParser::getPixelWidth()
     {
     if (not pImpl->isParsed)
         this->parse();
 
-    return pImpl->fixelWidth;
+    return pImpl->pixelWidth;
     }
