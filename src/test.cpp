@@ -7,17 +7,20 @@
 int
 main(int argc, char* argv[])
 try {
-    if (argc < 2)
-        {
-        std::cout << "Type file name." << std::endl;
-        }
+    std::cout << "Type file name." << std::endl;
+    std::string filename;
+    std::getline(std::cin, filename);
 
-    cv::Mat src = cv::imread(argv[1]);
+    cv::Mat src = cv::imread(filename);
 
     if (src.empty())
         {
-        std::cout << "File " << argv[1] << " does not exist." << std::endl;
+        std::cout << "File " << filename << " does not exist." << std::endl;
+        return 1;
         }
+
+    cv::imshow("input image", src);
+    cv::waitKey();
 
     GraphSplitter graphSplitter;
 
@@ -64,7 +67,7 @@ try {
                      std::setiosflags(std::ios::fixed) <<
                      yOffset + point.y * pixelHeight   <<
                      std::endl;
-    cv::waitKey(0);
+    cv::waitKey();
 
     return 0;
     }
