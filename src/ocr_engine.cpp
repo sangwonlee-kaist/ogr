@@ -49,7 +49,7 @@ OcrEngine::getText()
     // copy to string.
     std::string text {rawText}; 
     // release used memory
-    delete [] rawText;
+    delete[] rawText;
 
     return text;
     }

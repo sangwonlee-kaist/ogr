@@ -54,7 +54,7 @@ analyzeNumberImage(const cv::Mat& numberImage,
     cv::findContours(img,
         contours,
         hierarchy,
-        cv::RETR_EXTERNAL,          // I do not know.
+        cv::RETR_EXTERNAL,           // I do not know.
         cv::CHAIN_APPROX_TC89_KCOS); // I do not know. See the reference.
 
     // Approximate contours to polygons + get bounding rects and circles.
@@ -70,19 +70,15 @@ analyzeNumberImage(const cv::Mat& numberImage,
 
     // Sort poly contour by x direction.
     std::sort(polyContours.begin(), polyContours.end(),
-              [](const std::vector<cv::Point>& c1,
-                 const std::vector<cv::Point>& c2)
-                 {
-                 return cv::norm(cv::boundingRect(c1).br()) < 
-                        cv::norm(cv::boundingRect(c2).br());
-                 });    // Merge small contours.
+        [](const std::vector<cv::Point>& c1, const std::vector<cv::Point>& c2)
+            {
+            return cv::norm(cv::boundingRect(c1).br()) <
+                   cv::norm(cv::boundingRect(c2).br());});    // Merge small contours.
 
     // Make rect of polyContour.
     std::vector<cv::Rect> polyContourRects (polyContours.size());
     for (int i = 0; i < polyContours.size(); ++i)
-        {
         polyContourRects[i] = cv::boundingRect(polyContours[i]);
-        }
 
 #ifdef DEBUG
     // Small points are detected.
@@ -96,7 +92,6 @@ analyzeNumberImage(const cv::Mat& numberImage,
     for (int i = 0; i < polyContourRects.size(); i++)
         {
         //cv::Rect rect = cv::boundingRect(polyContours[i]);
-
         cv::rectangle(dispImage,
             polyContourRects[i].tl(),
             polyContourRects[i].br(),
@@ -118,10 +113,7 @@ analyzeNumberImage(const cv::Mat& numberImage,
     int maxContourWidth =
         std::max_element(polyContourRects.begin(), polyContourRects.end(),
             [](const cv::Rect& r1, const cv::Rect& r2)
-                {
-                return r1.width < r2.width;
-                }
-            )->width;
+                {return r1.width < r2.width;})->width;
 
     PRTTXT(maxContourWidth)
 
@@ -166,10 +158,10 @@ analyzeNumberImage(const cv::Mat& numberImage,
         //    continue;
 
         cv::rectangle(dispImage,
-                      boundRect[i].tl(),
-                      boundRect[i].br(),
-                      cv::Scalar (0, 255, 0),
-                      2);
+            boundRect[i].tl(),
+            boundRect[i].br(),
+            cv::Scalar (0, 255, 0),
+            2);
         }
 
     PRTIMG(dispImage)
@@ -177,11 +169,8 @@ analyzeNumberImage(const cv::Mat& numberImage,
 
     // Sort merged contour by y direction.
     std::sort(mergedContours.begin(), mergedContours.end(),
-              [](const std::vector<cv::Point>& c1,
-                 const std::vector<cv::Point>& c2)
-                 {
-                 return cv::boundingRect(c1).y > cv::boundingRect(c2).y;
-                 });
+        [](const std::vector<cv::Point>& c1, const std::vector<cv::Point>& c2)
+            {return cv::boundingRect(c1).y > cv::boundingRect(c2).y;});
 
     OcrEngine ocrEngine;
 
@@ -218,7 +207,7 @@ analyzeNumberImage(const cv::Mat& numberImage,
         }
 
     pixelHeight  = ( numValues[1]  - numValues[0]) /
-                  (numCenters[1] - numCenters[0]);
+                   (numCenters[1] - numCenters[0]);
     offsetValue = numValues[0] - numCenters[0] * pixelHeight;
 
     //std::cout << "Pixel Height  = " << pixelHeight  << std::endl;
@@ -230,8 +219,8 @@ analyzeNumberImage(const cv::Mat& numberImage,
     // Simple test... predict fourth contour values.
     cv::Rect rect4 = cv::boundingRect(mergedContours[3]);
     std::cout << "Expected value = 4" << std::endl;
-    std::cout << "Result   value = " << offsetValue + (rect4.y +
-        rect4.height / 2) * pixelHeight << std::endl;
+    std::cout << "Result   value = " << offsetValue + 
+        (rect4.y + rect4.height / 2) * pixelHeight << std::endl;
 #endif
     // Neglect! ---------------------------------------------------------
     // This is an test region.
@@ -345,8 +334,8 @@ YAxisParser::parse()
     for (int i = 0; i < numCols; ++i)
         {
         cv::line(canvas, cv::Point(i, maxHistogram), 
-                         cv::Point(i, maxHistogram - zeroHistogram[i]),
-                         cv::Scalar(0, 255, 0));
+            cv::Point(i, maxHistogram - zeroHistogram[i]),
+            cv::Scalar(0, 255, 0));
         }
 
     cv::imshow("zero histogram on y axis", canvas); cv::waitKey();
@@ -354,13 +343,15 @@ YAxisParser::parse()
 #endif
 
     std::vector<int> zeroSignals (zeroHistogram.size());
-    std::transform(zeroHistogram.begin(), zeroHistogram.end(), // Source.
+    std::transform(zeroHistogram.begin(), 
+        zeroHistogram.end(), // Source.
         zeroSignals.begin(), // Destination. 
         [](int val) {return (val > 0 ? 1 : 0);});
 
     std::vector<int> signalDiffs (zeroSignals.size());
-    std::adjacent_difference(zeroSignals.begin(), zeroSignals.end(),
-                             signalDiffs.begin());
+    std::adjacent_difference(zeroSignals.begin(),
+        zeroSignals.end(),
+        signalDiffs.begin());
 
     int tickEndColIndex = numCols;
     std::vector< std::pair<int, int> > regionBeginEnd;     

@@ -93,10 +93,7 @@ PointDetector::detect()
 
     // Sort rectangle by x direction.
     std::sort(boundRect.begin(), boundRect.end(),
-              [](const cv::Rect& c1, const cv::Rect& c2)
-                 {
-                 return c1.x < c2.x;
-                 });
+        [](const cv::Rect& c1, const cv::Rect& c2) {return c1.x < c2.x;});
 
     // Draw polygonal contour + bonding rects + circles
     cv::RNG rng (12345);
@@ -106,9 +103,8 @@ PointDetector::detect()
         if (boundRect[i].area() > 500)
             continue;
 
-        cv::Scalar color = cv::Scalar (rng.uniform(0, 255),
-                                       rng.uniform(0, 255),
-                                       rng.uniform(0, 255));
+        cv::Scalar color = 
+            cv::Scalar (rng.uniform(0, 255), rng.uniform(0, 255), rng.uniform(0, 255));
 //        cv::drawContours(drawing, // image
 //            polyContours,   // contours
 //            i,              // contour index

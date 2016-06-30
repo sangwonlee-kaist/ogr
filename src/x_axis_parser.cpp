@@ -18,8 +18,8 @@ namespace // Helper functions.
 {
 void
 analyzeNumberImage(const cv::Mat& numberImage,
-              double& offsetValue,
-              double& pixelWidth)
+    double& offsetValue,
+    double& pixelWidth)
     {
     // Calculate the width of pixel from figure ticks.
     // Once you get the pixel width, you can calculate the distance between two
@@ -72,19 +72,16 @@ analyzeNumberImage(const cv::Mat& numberImage,
 
     // Sort poly contour by x direction.
     std::sort(polyContours.begin(), polyContours.end(),
-              [](const std::vector<cv::Point>& c1,
-                 const std::vector<cv::Point>& c2)
-                 {
-                 return cv::boundingRect(c1).x < cv::boundingRect(c2).x;
-                 });
+        [](const std::vector<cv::Point>& c1, const std::vector<cv::Point>& c2)
+            {
+            return cv::boundingRect(c1).x < cv::boundingRect(c2).x;
+            });
 
     // Make rect of polyContour.
     std::vector<cv::Rect> polyContourRects (polyContours.size());
     for (int i = 0; i < polyContours.size(); ++i)
-        {
         polyContourRects[i] = cv::boundingRect(polyContours[i]);
-        }
-
+        
 #ifdef DEBUG
     // Small points are detected.
     // We can merge this with nearest contours.
@@ -97,7 +94,6 @@ analyzeNumberImage(const cv::Mat& numberImage,
     for (int i = 0; i < polyContourRects.size(); i++)
         {
         //cv::Rect rect = cv::boundingRect(polyContours[i]);
-
         cv::rectangle(
             dispImage,
             polyContourRects[i].tl(),
@@ -164,7 +160,6 @@ analyzeNumberImage(const cv::Mat& numberImage,
         {
         //if (boundRect[i].area() < 100)
         //    continue;
-
         cv::rectangle(dispImage,
             boundRect[i].tl(),
             boundRect[i].br(),
@@ -178,12 +173,12 @@ analyzeNumberImage(const cv::Mat& numberImage,
 
     // Sort merged contour by x direction.
     std::sort(mergedContours.begin(), mergedContours.end(),
-              [](const std::vector<cv::Point>& c1,
-                 const std::vector<cv::Point>& c2)
-                 {
-                 return cv::boundingRect(c1).x < cv::boundingRect(c2).x;
-                 });
+        [](const std::vector<cv::Point>& c1, const std::vector<cv::Point>& c2)
+            {
+            return cv::boundingRect(c1).x < cv::boundingRect(c2).x;
+            });
 
+    // OcrEngine !
     OcrEngine ocrEngine;
 
 #ifdef DEBUG

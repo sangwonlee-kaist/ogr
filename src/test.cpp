@@ -25,7 +25,7 @@ try {
     GraphSplitter graphSplitter;
 
     graphSplitter.setImage(src);
-    graphSplitter.split();
+//    graphSplitter.split();
 
 //    cv::imshow("src image", src);
 //
