@@ -1,6 +1,7 @@
 #pragma once
 
 #include "config.hpp"
+#include "ocr_engine.hpp"
 
 class XAxisParser
     {

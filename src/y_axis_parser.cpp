@@ -98,10 +98,10 @@ analyzeNumberImage(const cv::Mat& numberImage,
         //cv::Rect rect = cv::boundingRect(polyContours[i]);
 
         cv::rectangle(dispImage,
-                      polyContourRects[i].tl(),
-                      polyContourRects[i].br(),
-                      cv::Scalar (0, 255, colorInterval * i), // BGR, so green.
-                      2);
+            polyContourRects[i].tl(),
+            polyContourRects[i].br(),
+            cv::Scalar (0, 255, colorInterval * i), // BGR, so green.
+            2);
         }
 
     PRTIMG(dispImage)
@@ -183,28 +183,16 @@ analyzeNumberImage(const cv::Mat& numberImage,
                  return cv::boundingRect(c1).y > cv::boundingRect(c2).y;
                  });
 
-    tesseract::TessBaseAPI tessBaseAPI;
-    tessBaseAPI.Init(nullptr, "eng");
+    OcrEngine ocrEngine;
 
 #ifdef DEBUG
     for (int i = 0; i < mergedContours.size(); ++i)
         {
         cv::Mat num = numberImage(cv::boundingRect(mergedContours[i]));
         cv::resize(num, num, cv::Size (100, 100));
-        tessBaseAPI.SetImage(static_cast<uchar*>(num.data),
-                        num.size().width,
-                        num.size().height,
-                        num.channels(),
-                        num.step1());
-        // Use unique pointer to prevent memory loss.
-        std::unique_ptr<char> numberString (tessBaseAPI.GetUTF8Text(),
-                                            std::default_delete<char>());
-        PRTIMG(num)
-        std::stringstream ss;
-        double number = 0;
-        ss << numberString.get();
-        ss >> number;
-        std::cout << "Number = " << number << std::endl;
+
+        ocrEngine.setImage(num);
+        std::cout << "Number = " << ocrEngine.getText() << std::endl;
         }
 #endif
 
@@ -217,19 +205,14 @@ analyzeNumberImage(const cv::Mat& numberImage,
         cv::Rect rect = cv::boundingRect(mergedContours[i]);
         cv::Mat num  = numberImage(rect);
         cv::resize(num, num, cv::Size (100, 100));
-        tessBaseAPI.SetImage(static_cast<uchar*>(num.data),
-                        num.size().width,
-                        num.size().height,
-                        num.channels(),
-                        num.step1());
-        // Use unique pointer to prevent memory loss.
-        std::unique_ptr<char> numberString (tessBaseAPI.GetUTF8Text(),
-                                            std::default_delete<char>());
+
+        ocrEngine.setImage(num);
 
         std::stringstream ss;
         double number = 0;
         // lexical cast
-        ss << numberString.get(); ss >> number;
+        ss << ocrEngine.getText();
+        ss >> number;
         numValues.push_back(number);
         numCenters.push_back((rect.y + rect.y + rect.height) / 2);
         }
@@ -372,11 +355,8 @@ YAxisParser::parse()
 
     std::vector<int> zeroSignals (zeroHistogram.size());
     std::transform(zeroHistogram.begin(), zeroHistogram.end(), // Source.
-                   zeroSignals.begin(), // Destination. 
-                   [](int val) 
-                       {
-                       return (val > 0 ? 1 : 0);
-                       });
+        zeroSignals.begin(), // Destination. 
+        [](int val) {return (val > 0 ? 1 : 0);});
 
     std::vector<int> signalDiffs (zeroSignals.size());
     std::adjacent_difference(zeroSignals.begin(), zeroSignals.end(),
@@ -496,20 +476,9 @@ YAxisParser::parse()
 
     PRTIMG(labelImage)
 
-    tesseract::TessBaseAPI tessBaseAPI;
-    tessBaseAPI.Init(nullptr, "eng");
-    tessBaseAPI.SetImage(static_cast<uchar*>(labelImage.data),
-                    labelImage.size().width,
-                    labelImage.size().height,
-                    labelImage.channels(),
-                    labelImage.step1());
-    // Use unique pointer to prevent memory loss.
-    std::unique_ptr<char> labelString (tessBaseAPI.GetUTF8Text(),
-                                       std::default_delete<char>());
-    std::stringstream ss;
-    ss << labelString.get();
-    // copy labelString to member.
-    std::getline(ss, pImpl->label);
+    OcrEngine ocrEngine;
+    ocrEngine.setImage(labelImage);
+    pImpl->label = ocrEngine.getText();
 
     //std::cout << pImpl->label << std::endl;
     PRTTXT(pImpl->label)
