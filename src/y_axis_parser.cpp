@@ -1,19 +1,5 @@
 #include "y_axis_parser.hpp"
 
-//#define DEBUG
-
-#ifdef DEBUG
-    #define PRTIMG(x)     cv::imshow(#x, x); cv::waitKey();
-    #define PRTTXT(x)     std::cout << #x << " = " << x << std::endl;
-    #define PRTIMG2(x, y) cv::imshow(#x, y); cv::waitKey();
-    #define PRTTXT2(x, y) std::cout <<  x << " = " << y << std::endl;
-#else
-    #define PRTIMG(x)
-    #define PRTTXT(x)
-    #define PRTIMG2(x, y)
-    #define PRTTXT2(x, y)
-#endif
-
 namespace // Helper functions.
 {
 void
@@ -80,29 +66,24 @@ analyzeNumberImage(const cv::Mat& numberImage,
     for (int i = 0; i < polyContours.size(); ++i)
         polyContourRects[i] = cv::boundingRect(polyContours[i]);
 
-#ifdef DEBUG
-    // Small points are detected.
-    // We can merge this with nearest contours.
-    {
-    // Display for debug.
-    cv::Mat dispImage = img.clone();
-    cv::cvtColor(dispImage, dispImage, cv::COLOR_GRAY2BGR);
-    int colorInterval = 255 / polyContours.size();
-    //for (int i = 0; i < polyContours.size(); i++)
-    for (int i = 0; i < polyContourRects.size(); i++)
-        {
-        //cv::Rect rect = cv::boundingRect(polyContours[i]);
-        cv::rectangle(dispImage,
-            polyContourRects[i].tl(),
-            polyContourRects[i].br(),
-            cv::Scalar (0, 255, colorInterval * i), // BGR, so green.
-            2);
-        }
+    DEBUG_ONLY_BEGIN
+        // Display for debug.
+        cv::Mat dispImage = img.clone();
+        cv::cvtColor(dispImage, dispImage, cv::COLOR_GRAY2BGR);
+        int colorInterval = 255 / polyContours.size();
+        //for (int i = 0; i < polyContours.size(); i++)
+        for (int i = 0; i < polyContourRects.size(); i++)
+            {
+            //cv::Rect rect = cv::boundingRect(polyContours[i]);
+            cv::rectangle(dispImage,
+                polyContourRects[i].tl(),
+                polyContourRects[i].br(),
+                cv::Scalar (0, 255, colorInterval * i), // BGR, so green.
+                2);
+            }
 
-    PRTIMG(dispImage)
-    }
-#endif
-
+        PRTIMG(dispImage)
+    DEBUG_ONLY_END
     // Merge small contours.
 
     // If two distance between two adjacent contours is smaller than
@@ -148,25 +129,26 @@ analyzeNumberImage(const cv::Mat& numberImage,
     for (int i = 0; i < mergedContours.size(); ++i)
         boundRect[i] = cv::boundingRect(mergedContours[i]);
 
-#ifdef DEBUG
-    // Display for debug.
-    cv::Mat dispImage = img.clone();
-    cv::cvtColor(dispImage, dispImage, cv::COLOR_GRAY2BGR);
-    for (int i = 0; i < mergedContours.size(); i++)
-        {
-        //if (boundRect[i].area() < 100)
-        //    continue;
+    DEBUG_ONLY_BEGIN
 
-        cv::rectangle(dispImage,
-            boundRect[i].tl(),
-            boundRect[i].br(),
-            cv::Scalar (0, 255, 0),
-            2);
-        }
+        // Display for debug.
+        cv::Mat dispImage = img.clone();
+        cv::cvtColor(dispImage, dispImage, cv::COLOR_GRAY2BGR);
+        for (int i = 0; i < mergedContours.size(); i++)
+            {
+            //if (boundRect[i].area() < 100)
+            //    continue;
 
-    PRTIMG(dispImage)
-#endif
+            cv::rectangle(dispImage,
+                boundRect[i].tl(),
+                boundRect[i].br(),
+                cv::Scalar (0, 255, 0),
+                2);
+            }
 
+        PRTIMG(dispImage)
+
+    DEBUG_ONLY_END
     // Sort merged contour by y direction.
     std::sort(mergedContours.begin(), mergedContours.end(),
         [](const std::vector<cv::Point>& c1, const std::vector<cv::Point>& c2)
@@ -174,17 +156,18 @@ analyzeNumberImage(const cv::Mat& numberImage,
 
     OcrEngine ocrEngine;
 
-#ifdef DEBUG
-    for (int i = 0; i < mergedContours.size(); ++i)
-        {
-        cv::Mat num = numberImage(cv::boundingRect(mergedContours[i]));
-        cv::resize(num, num, cv::Size (100, 100));
+    DEBUG_ONLY_BEGIN
 
-        ocrEngine.setImage(num);
-        std::cout << "Number = " << ocrEngine.getText() << std::endl;
-        }
-#endif
+        for (int i = 0; i < mergedContours.size(); ++i)
+            {
+            cv::Mat num = numberImage(cv::boundingRect(mergedContours[i]));
+            cv::resize(num, num, cv::Size (100, 100));
 
+            ocrEngine.setImage(num);
+            std::cout << "Number = " << ocrEngine.getText() << std::endl;
+            }
+
+    DEBUG_ONLY_END
     // Throw away first and last element.
     // Two points are sufficient to figure out unit system.
     std::vector<double> numValues;
@@ -215,13 +198,14 @@ analyzeNumberImage(const cv::Mat& numberImage,
     PRTTXT(pixelHeight)
     PRTTXT(offsetValue)
 
-#ifdef DEBUG
-    // Simple test... predict fourth contour values.
-    cv::Rect rect4 = cv::boundingRect(mergedContours[3]);
-    std::cout << "Expected value = 4" << std::endl;
-    std::cout << "Result   value = " << offsetValue + 
-        (rect4.y + rect4.height / 2) * pixelHeight << std::endl;
-#endif
+    DEBUG_ONLY_BEGIN
+        // Simple test... predict fourth contour values.
+        cv::Rect rect4 = cv::boundingRect(mergedContours[3]);
+        std::cout << "Expected value = 4" << std::endl;
+        std::cout << "Result   value = " << offsetValue +
+            (rect4.y + rect4.height / 2) * pixelHeight << std::endl;
+
+    DEBUG_ONLY_END
     // Neglect! ---------------------------------------------------------
     // This is an test region.
     // New algorithm.

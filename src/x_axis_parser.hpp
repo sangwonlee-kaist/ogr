@@ -2,6 +2,7 @@
 
 #include "config.hpp"
 #include "ocr_engine.hpp"
+#include "debug_helper.hpp"
 
 class XAxisParser
     {

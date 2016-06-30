@@ -1,15 +1,5 @@
 #include "point_detector.hpp"
 
-#ifdef DEBUG
-    #define PRTIMG(x)     cv::imshow(#x, x); cv::waitKey(0);
-    #define PRTTXT(x)     std::cout << #x << " = " << x << std::endl;
-    #define PRTTXT2(x, y) std::cout <<  x << " = " << y << std::endl;
-#else
-    #define PRTIMG(x)
-    #define PRTTXT(x)
-    #define PRTTXT2(x, y)
-#endif
-
 class PointDetector::impl
     {
 public:
