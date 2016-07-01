@@ -6,48 +6,55 @@
 #include <vector>
 #include <chrono>
 
+#include "../line_point_splitter.hpp"
+
 int main()
     {
     cv::Mat image = cv::imread("symbol2.png");
-    cv::Mat gray;
 
-    if (image.empty())
-        {
-        std::cerr << "File open error." << std::endl;
-        return 1;
-        }
+    LinePointSplitter linePointSplitter;
+    linePointSplitter.setImage(image);
+    cv::Mat opened = linePointSplitter.getPointImage();
 
-    cv::imshow("Input image", image);
+    //cv::Mat gray;
 
-    if (image.channels() == 3) // color
-        cv::cvtColor(image, gray, cv::COLOR_BGR2GRAY);
-    else 
-        gray = image.clone();
+    //if (image.empty())
+    //    {
+    //    std::cerr << "File open error." << std::endl;
+    //    return 1;
+    //    }
 
-    cv::Mat binary;
-    // When the value of cv::THRESH_OTSU is defined, 
-    // the threshold function returns the optimal 
-    // threshold value obtained by the Otsu's algorithm.
-    // 0 (threshold value parameter) is ignored.
-    cv::threshold(gray, binary, 0, 255, cv::THRESH_OTSU + cv::THRESH_BINARY_INV);
+    //cv::imshow("Input image", image);
 
-    cv::imshow("Binary image", binary);
-    cv::imwrite("binary.png", binary);
+    //if (image.channels() == 3) // color
+    //    cv::cvtColor(image, gray, cv::COLOR_BGR2GRAY);
+    //else 
+    //    gray = image.clone();
 
-    cv::Mat element5 {5, 5, CV_8U, cv::Scalar {1}};
-    cv::Mat opened;
-    cv::morphologyEx(binary, opened, cv::MORPH_OPEN, element5);
+    //cv::Mat binary;
+    //// When the value of cv::THRESH_OTSU is defined, 
+    //// the threshold function returns the optimal 
+    //// threshold value obtained by the Otsu's algorithm.
+    //// 0 (threshold value parameter) is ignored.
+    //cv::threshold(gray, binary, 0, 255, cv::THRESH_OTSU + cv::THRESH_BINARY_INV);
 
-    cv::imshow("Opened binary", opened);
-    cv::imwrite("opened.png", opened);
+    //cv::imshow("Binary image", binary);
+    //cv::imwrite("binary.png", binary);
 
-    cv::Mat dilated;
-    cv::Mat element7 {7, 7, CV_8U, cv::Scalar {1}};
-    cv::dilate(opened, dilated, element7);
-    cv::Mat curve = binary - dilated;
-    
-    cv::imshow("binary - dilated", curve);
-    cv::imwrite("curves.png", curve);
+    //cv::Mat element5 {5, 5, CV_8U, cv::Scalar {1}};
+    //cv::Mat opened;
+    //cv::morphologyEx(binary, opened, cv::MORPH_OPEN, element5);
+
+    //cv::imshow("Opened binary", opened);
+    //cv::imwrite("opened.png", opened);
+
+    //cv::Mat dilated;
+    //cv::Mat element7 {7, 7, CV_8U, cv::Scalar {1}};
+    //cv::dilate(opened, dilated, element7);
+    //cv::Mat curve = binary - dilated;
+    //
+    //cv::imshow("binary - dilated", curve);
+    //cv::imwrite("curves.png", curve);
 
     std::vector< std::vector<cv::Point> > contours;
     std::vector<cv::Vec4i> hierarchy;

@@ -3,15 +3,16 @@
 #include "config.hpp"
 #include "debug_helper.hpp"
 
-class CurveRemover
+class LinePointSplitter
     {
 public:
-     CurveRemover();
-    ~CurveRemover();
+     LinePointSplitter();
+    ~LinePointSplitter();
 
     void remove();
     void setImage(const cv::Mat& inputImage);
-    cv::Mat getImage();
+    cv::Mat getLineImage();
+    cv::Mat getPointImage();
 private:
     class impl;
     std::unique_ptr<impl> pImpl;
