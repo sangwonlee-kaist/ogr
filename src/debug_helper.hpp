@@ -2,7 +2,7 @@
 
 #include "config.hpp"
 
-//#define OGR_DEBUG
+#define OGR_DEBUG
 
 #ifdef OGR_DEBUG
     #define PRTIMG_HELPER(x, y)         \
@@ -31,6 +31,9 @@
 
     #define DEBUG_ONLY_BEGIN [&]() {
     #define DEBUG_ONLY_END   }();
+
+    #define DEBUG_SHOW_IMG(x) PRTIMG(x)
+    #define DEBUG_SHOW_VAR(x) PRTTXT(x)
 #else
     #define PRTIMG(x)
     #define PRTTXT(x)
