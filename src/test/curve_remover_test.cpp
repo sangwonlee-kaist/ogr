@@ -6,19 +6,20 @@
 #include <vector>
 #include <chrono>
 
+#include "../graph_splitter.hpp"
 #include "../line_point_splitter.hpp"
 #include "../point_detector.hpp"
 
 int main()
     {
-    cv::Mat image = cv::imread("real5.png");
+    GraphSplitter graphSplitter;
+    graphSplitter.setImage(cv::imread("SH2.png"));
 
     LinePointSplitter linePointSplitter;
-    linePointSplitter.setImage(image);
-    cv::Mat pointImage = linePointSplitter.getPointImage();
-
+    linePointSplitter.setImage(graphSplitter.getDataImage());
+    
     PointDetector pointDetector;
-    pointDetector.setImage(pointImage);
+    pointDetector.setImage(linePointSplitter.getPointImage());
     pointDetector.getPoints();
 
     return 0;

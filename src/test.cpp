@@ -1,5 +1,6 @@
 #include "config.hpp"
 #include "graph_splitter.hpp"
+#include "line_point_splitter.hpp"
 #include "x_axis_parser.hpp"
 #include "point_detector.hpp"
 #include "y_axis_parser.hpp"
@@ -47,8 +48,11 @@ try {
     double yOffset     = yAxisParser.getOffsetValue();
     double pixelHeight = yAxisParser.getPixelHeight();
 
+
+    LinePointSplitter linePointSplitter;
+    linePointSplitter.setImage(graphSplitter.getDataImage());
     PointDetector pointDetector;
-    pointDetector.setImage(graphSplitter.getDataImage());
+    pointDetector.setImage(linePointSplitter.getPointImage());
 
     std::vector<cv::Point> points;
     points = pointDetector.getPoints();

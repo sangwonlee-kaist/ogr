@@ -6,7 +6,7 @@ public:
      impl() = default;
     ~impl() = default;
 
-    bool isRemoved;
+    bool isSplitted;
     cv::Mat inputImage;
     cv::Mat lineImage;
     cv::Mat pointImage;
@@ -14,7 +14,7 @@ public:
 
 LinePointSplitter::LinePointSplitter() : pImpl {new impl}
     {
-    pImpl->isRemoved = false;
+    pImpl->isSplitted = false;
     }
 
 LinePointSplitter::~LinePointSplitter()
@@ -23,9 +23,9 @@ LinePointSplitter::~LinePointSplitter()
     }
 
 void
-LinePointSplitter::remove()
+LinePointSplitter::split()
     {
-    if (pImpl->isRemoved)
+    if (pImpl->isSplitted)
         return;
 
     if (pImpl->inputImage.empty())
@@ -66,21 +66,21 @@ LinePointSplitter::remove()
  
     pImpl->lineImage = lineImage;
     pImpl->pointImage = pointImage;
-    pImpl->isRemoved = true;
+    pImpl->isSplitted = true;
     }
 
 void
 LinePointSplitter::setImage(const cv::Mat& inputImage)
     {
     pImpl->inputImage = inputImage;
-    pImpl->isRemoved = false;
+    pImpl->isSplitted = false;
     }
 
 cv::Mat
 LinePointSplitter::getLineImage()
     {
-    if (not pImpl->isRemoved)
-        this->remove();
+    if (not pImpl->isSplitted)
+        this->split();
 
     return pImpl->lineImage.clone();
     }
@@ -88,8 +88,8 @@ LinePointSplitter::getLineImage()
 cv::Mat
 LinePointSplitter::getPointImage()
     {
-    if (not pImpl->isRemoved)
-        this->remove();
+    if (not pImpl->isSplitted)
+        this->split();
 
     return pImpl->pointImage.clone();
     }

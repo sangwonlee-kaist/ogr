@@ -9,7 +9,7 @@ public:
      LinePointSplitter();
     ~LinePointSplitter();
 
-    void remove();
+    void split();
     void setImage(const cv::Mat& inputImage);
     cv::Mat getLineImage();
     cv::Mat getPointImage();
