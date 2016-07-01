@@ -27,7 +27,10 @@ CurveRemover::remove()
     if (pImpl->isRemoved)
         return;
 
+    if (pImpl->inputImage.empty())
+        throw std::invalid_argument {"CurveRemover::remove(): Empty image."};
 
+    
 
     pImpl->isRemoved = true;
     }
