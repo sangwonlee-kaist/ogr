@@ -30,7 +30,7 @@ analyzeNumberImage(const cv::Mat& numberImage,
 
     img = ~img;
 
-    PRTIMG(img);
+    DEBUG_SHOW_IMG(img);
 
     // Find initial contours from obtained points.
     std::vector< std::vector<cv::Point> > contours;
@@ -82,7 +82,7 @@ analyzeNumberImage(const cv::Mat& numberImage,
                 2);
             }
 
-        PRTIMG(dispImage)
+        DEBUG_SHOW_IMG(dispImage)
     DEBUG_ONLY_END
     // Merge small contours.
 
@@ -96,7 +96,7 @@ analyzeNumberImage(const cv::Mat& numberImage,
             [](const cv::Rect& r1, const cv::Rect& r2)
                 {return r1.width < r2.width;})->width;
 
-    PRTTXT(maxContourWidth)
+    DEBUG_SHOW_VAR(maxContourWidth)
 
     std::vector< std::vector<cv::Point> > mergedContours {polyContours[0]};
     for (int i = 0; i < polyContours.size() - 1; i++)
@@ -146,7 +146,7 @@ analyzeNumberImage(const cv::Mat& numberImage,
                 2);
             }
 
-        PRTIMG(dispImage)
+        DEBUG_SHOW_IMG(dispImage)
 
     DEBUG_ONLY_END
     // Sort merged contour by y direction.
@@ -195,8 +195,8 @@ analyzeNumberImage(const cv::Mat& numberImage,
 
     //std::cout << "Pixel Height  = " << pixelHeight  << std::endl;
     //std::cout << "Offset value = " << offsetValue << std::endl;
-    PRTTXT(pixelHeight)
-    PRTTXT(offsetValue)
+    DEBUG_SHOW_VAR(pixelHeight)
+    DEBUG_SHOW_VAR(offsetValue)
 
     DEBUG_ONLY_BEGIN
         // Simple test... predict fourth contour values.
@@ -263,7 +263,7 @@ YAxisParser::parse()
             {"YAxisParser::parse(): No input image."};
         }
 
-    PRTIMG(pImpl->axisImage)
+    DEBUG_SHOW_IMG(pImpl->axisImage)
 
     // Remove unwanted xticks.
     // First, Make image to gray color.
@@ -277,7 +277,7 @@ YAxisParser::parse()
         grayImage = pImpl->axisImage.clone();
         }
 
-    PRTIMG(grayImage)
+    DEBUG_SHOW_IMG(grayImage)
 
     // Second, Change gray to binary.
     cv::Mat binaryImage;
@@ -290,7 +290,7 @@ YAxisParser::parse()
        -3  // Larage value to remove noise (I am not sure).
         );
 
-    PRTIMG(binaryImage)
+    DEBUG_SHOW_IMG(binaryImage)
 
     // Seperate image to 3 region.
     // 1. tic region.
@@ -373,7 +373,7 @@ YAxisParser::parse()
     int maxRegionWidth = maxRegionPairIterator->second - 
                          maxRegionPairIterator->first;
 
-    PRTTXT(maxRegionWidth)
+    DEBUG_SHOW_VAR(maxRegionWidth)
 
     // Merge small regions.
     std::vector< std::pair<int, int> > mergedRegionBeginEnd;
@@ -387,7 +387,7 @@ YAxisParser::parse()
 
         // Merge them but do not put to array 
         // (possibility of additional merging).
-        PRTTXT(rightPair.first - leftPair.second)
+        DEBUG_SHOW_VAR(rightPair.first - leftPair.second)
         if (rightPair.first - leftPair.second < maxRegionWidth / 3)
             {
             end = rightPair.second; 
@@ -437,7 +437,7 @@ YAxisParser::parse()
                             0,
                             numberBeginColIndex - numberEndColIndex,
                             numRows)).clone();
-    PRTIMG(numberImage)
+    DEBUG_SHOW_IMG(numberImage)
 
     analyzeNumberImage(numberImage, pImpl->offsetValue, pImpl->pixelHeight);
 
@@ -449,14 +449,14 @@ YAxisParser::parse()
     // Lotate 90 degree for clockwise.
     cv::flip(labelImage.t(), labelImage, 1);
 
-    PRTIMG(labelImage)
+    DEBUG_SHOW_IMG(labelImage)
 
     OcrEngine ocrEngine;
     ocrEngine.setImage(labelImage);
     pImpl->label = ocrEngine.getText();
 
     //std::cout << pImpl->label << std::endl;
-    PRTTXT(pImpl->label)
+    DEBUG_SHOW_VAR(pImpl->label)
 
     pImpl->isParsed = true;
     }

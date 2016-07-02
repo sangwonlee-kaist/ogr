@@ -43,7 +43,7 @@ PointDetector::detect()
             {"PointDetector::detect(): No input image."};
         }
 
-    PRTIMG(pImpl->dataImage)
+    DEBUG_SHOW_IMG(pImpl->dataImage)
 
     // Make image to gray color.
     cv::Mat grayImage;
@@ -56,7 +56,7 @@ PointDetector::detect()
         grayImage = pImpl->dataImage.clone();
         }
 
-    PRTIMG(grayImage)
+    DEBUG_SHOW_IMG(grayImage)
     // I think blur process is not necessary...
     // The figure of journal is useually clear to figure out.
     // So I did not anyway.
@@ -109,7 +109,7 @@ PointDetector::detect()
             color, 2, 8, 0);
         }
 
-    PRTIMG(drawing)
+    DEBUG_SHOW_IMG(drawing)
 
     pImpl->points.resize(0);
     for(int i = 0; i < contours.size(); ++i)

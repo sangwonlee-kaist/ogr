@@ -29,7 +29,7 @@ analyzeNumberImage(const cv::Mat& numberImage,
 
     img = ~img;
 
-    PRTIMG(img);
+    DEBUG_SHOW_IMG(img);
 
     // Find initial contours from obtained points.
     std::vector< std::vector<cv::Point> > contours;
@@ -86,7 +86,7 @@ analyzeNumberImage(const cv::Mat& numberImage,
                 cv::Scalar (0, 255, colorInterval * i), // BGR, so green.
                 2);
             }
-        PRTIMG(dispImage)
+        DEBUG_SHOW_IMG(dispImage)
 
     DEBUG_ONLY_END
     // Merge small contours.
@@ -104,7 +104,7 @@ analyzeNumberImage(const cv::Mat& numberImage,
                 }
             )->width;
 
-    PRTTXT(maxContourWidth)
+    DEBUG_SHOW_VAR(maxContourWidth)
 
     std::vector< std::vector<cv::Point> > mergedContours {polyContours[0]};
     for (int i = 0; i < polyContours.size() - 1; i++)
@@ -149,7 +149,7 @@ analyzeNumberImage(const cv::Mat& numberImage,
                 2);
             }
 
-        PRTIMG(dispImage)
+        DEBUG_SHOW_IMG(dispImage)
 
     DEBUG_ONLY_END
 
@@ -200,8 +200,8 @@ analyzeNumberImage(const cv::Mat& numberImage,
 
     //std::cout << "Pixel width  = " << pixelWidth  << std::endl;
     //std::cout << "Offset value = " << offsetValue << std::endl;
-    PRTTXT(pixelWidth)
-    PRTTXT(offsetValue)
+    DEBUG_SHOW_VAR(pixelWidth)
+    DEBUG_SHOW_VAR(offsetValue)
 
     DEBUG_ONLY_BEGIN
 
@@ -269,7 +269,7 @@ XAxisParser::parse()
             {"XAxisParser::parse(): No input image."};
         }
 
-    PRTIMG(pImpl->axisImage)
+    DEBUG_SHOW_IMG(pImpl->axisImage)
 
     // Remove unwanted xticks.
     // First, Make image to gray color.
@@ -283,7 +283,7 @@ XAxisParser::parse()
         grayImage = pImpl->axisImage.clone();
         }
 
-    PRTIMG(grayImage)
+    DEBUG_SHOW_IMG(grayImage)
 
     // Second, Change gray to binary.
     cv::Mat binaryImage;
@@ -296,7 +296,7 @@ XAxisParser::parse()
        -3  // Larage value to remove noise (I am not sure).
         );
 
-    PRTIMG(binaryImage)
+    DEBUG_SHOW_IMG(binaryImage)
 
     // Seperate image to 3 region.
     // 1. tic region.
@@ -390,7 +390,7 @@ XAxisParser::parse()
                             numCols,
                             numberEndRowIndex - numberBeginRowIndex)).clone();
 
-    PRTIMG(numberImage)
+    DEBUG_SHOW_IMG(numberImage)
 
     analyzeNumberImage(numberImage, pImpl->offsetValue, pImpl->pixelWidth);
 
@@ -400,14 +400,14 @@ XAxisParser::parse()
                             numCols,
                             labelEndRowIndex - labelBeginRowIndex)).clone();
 
-    PRTIMG(labelImage)
+    DEBUG_SHOW_IMG(labelImage)
 
     OcrEngine ocrEngine;
     ocrEngine.setImage(labelImage);
     pImpl->label = ocrEngine.getText();
 
     //std::cout << pImpl->label << std::endl;
-    PRTTXT(pImpl->label)
+    DEBUG_SHOW_VAR(pImpl->label)
 
     pImpl->isParsed = true;
     }

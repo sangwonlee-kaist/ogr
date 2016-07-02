@@ -1,11 +1,5 @@
 #include "graph_splitter.hpp"
 
-#ifdef DEBUG
-    #define PRTIMG(x) cv::imshow(#x, x); cv::waitKey(0);
-#else
-    #define PRTIMG(x)
-#endif
-
 class GraphSplitter::impl
     {
 public:
@@ -65,7 +59,7 @@ GraphSplitter::split()
         grayImage = pImpl->graphImage.clone();
         }
 
-    PRTIMG(grayImage)
+    DEBUG_SHOW_IMG(grayImage)
     // Make binary image of gray image.
 
     cv::Mat binaryImage;
@@ -77,7 +71,7 @@ GraphSplitter::split()
         5,
        -2);
 
-    PRTIMG(binaryImage)
+    DEBUG_SHOW_IMG(binaryImage)
 
     // Size unit = Fixel.
 
@@ -97,7 +91,7 @@ GraphSplitter::split()
                horizontalLine , cv::Point(-1, -1));
 
     horizontalImage = ~horizontalImage;
-    PRTIMG(horizontalImage)
+    DEBUG_SHOW_IMG(horizontalImage)
 
     // Create vertical line image...
     cv::Mat verticalImage = binaryImage.clone();
@@ -115,7 +109,7 @@ GraphSplitter::split()
                verticalLine , cv::Point(-1, -1));
 
     verticalImage = ~verticalImage;
-    PRTIMG(verticalImage)
+    DEBUG_SHOW_IMG(verticalImage)
 
     // Find longest lines.
     int numRows     = pImpl->graphImage.rows;
@@ -243,7 +237,7 @@ GraphSplitter::split()
         pImpl->graphImage(cv::Rect(dataLeftColIndex, dataTopRowIndex,
                                    dataImageWidth,   dataImageHeight)).clone();
 
-    PRTIMG(pImpl->dataImage)
+    DEBUG_SHOW_IMG(pImpl->dataImage)
 
     // Extract x axis image.
     int xAxisImageWidth  = dataImageWidth;
@@ -255,7 +249,7 @@ GraphSplitter::split()
                                    xAxisImageWidth,
                                    xAxisImageHeight)).clone();
 
-    PRTIMG(pImpl->xAxisImage)
+    DEBUG_SHOW_IMG(pImpl->xAxisImage)
 
     // Extract y axis image.
     int yAxisImageWidth  = dataLeftColIndex;
@@ -267,7 +261,7 @@ GraphSplitter::split()
                                    yAxisImageWidth,
                                    yAxisImageHeight)).clone();
 
-    PRTIMG(pImpl->yAxisImage)
+    DEBUG_SHOW_IMG(pImpl->yAxisImage)
 
     pImpl->isSplited = true;
     }
